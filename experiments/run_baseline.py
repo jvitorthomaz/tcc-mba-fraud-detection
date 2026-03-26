@@ -1,5 +1,7 @@
 ''''
 python experiments/run_baseline.py
+
+python -m experiments.run_baseline
 '''
 from src.data.split import get_elliptic_splits
 from src.models.baseline import run_baseline_models
