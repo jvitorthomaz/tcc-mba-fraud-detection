@@ -22,23 +22,6 @@ def plot_confusion_matrix(y_true, y_pred, model_name):
     plt.close()
 
 
-def plot_roc_curve(y_true, y_prob, model_name):
-    fpr, tpr, _ = roc_curve(y_true, y_prob)
-    roc_auc = auc(fpr, tpr)
-
-    plt.figure()
-    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
-    plt.plot([0, 1], [0, 1], linestyle="--")
-
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title(f"ROC Curve - {model_name}")
-    plt.legend()
-
-    plt.savefig(f"results/figures/roc_{model_name}.png")
-    plt.close()
-
-
 def plot_pr_curve(y_true, y_prob, model_name):
     precision, recall, _ = precision_recall_curve(y_true, y_prob)
 

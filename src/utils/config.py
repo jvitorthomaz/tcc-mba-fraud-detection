@@ -12,3 +12,9 @@ VAL_MAX_TS = 34
 
 # Reprodutibilidade
 RANDOM_SEED = 42
+
+# GCN
+GCN_EPOCHS = 50
+GCN_LR = 0.01
+GCN_HIDDEN_1 = 64
+GCN_HIDDEN_2 = 32

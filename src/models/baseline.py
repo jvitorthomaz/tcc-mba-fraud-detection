@@ -1,27 +1,25 @@
 import pandas as pd
-import numpy as np
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
-    roc_auc_score,
     f1_score,
     precision_score,
-    recall_score
+    recall_score,
+    average_precision_score
 )
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
 from src.evaluation.plots import (
     plot_confusion_matrix,
-    plot_roc_curve,
     plot_pr_curve
 )
 
 
 def evaluate_model(y_true, y_pred, y_prob):
     return {
-        "AUC": roc_auc_score(y_true, y_prob),
+        "PR_AUC": average_precision_score(y_true, y_prob),
         "F1": f1_score(y_true, y_pred),
         "Precision": precision_score(y_true, y_pred),
         "Recall": recall_score(y_true, y_pred),
@@ -37,14 +35,10 @@ def prepare_data(df):
 def run_baseline_models(df_train, df_val, df_test):
     print("\n===== BASELINE MODELS =====")
 
-    # ==============================
-    # 1. PREPARAÇÃO
-    # ==============================
     X_train, y_train = prepare_data(df_train)
     X_val, y_val = prepare_data(df_val)
     X_test, y_test = prepare_data(df_test)
 
-    # Normalização (importante para LogReg)
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_val = scaler.transform(X_val)
@@ -53,7 +47,7 @@ def run_baseline_models(df_train, df_val, df_test):
     results = []
 
     # ==============================
-    # 2. LOGISTIC REGRESSION
+    # Logistic Regression
     # ==============================
     print("\nTreinando Logistic Regression...")
     lr = LogisticRegression(max_iter=1000, class_weight="balanced")
@@ -67,11 +61,10 @@ def run_baseline_models(df_train, df_val, df_test):
     results.append(metrics)
 
     plot_confusion_matrix(y_test, y_pred, "LogisticRegression")
-    plot_roc_curve(y_test, y_prob, "LogisticRegression")
     plot_pr_curve(y_test, y_prob, "LogisticRegression")
 
     # ==============================
-    # 3. RANDOM FOREST
+    # Random Forest
     # ==============================
     print("Treinando Random Forest...")
     rf = RandomForestClassifier(
@@ -91,11 +84,10 @@ def run_baseline_models(df_train, df_val, df_test):
     results.append(metrics)
 
     plot_confusion_matrix(y_test, y_pred, "RandomForest")
-    plot_roc_curve(y_test, y_prob, "RandomForest")
     plot_pr_curve(y_test, y_prob, "RandomForest")
 
     # ==============================
-    # 4. XGBOOST
+    # XGBoost
     # ==============================
     print("Treinando XGBoost...")
     xgb = XGBClassifier(
@@ -116,11 +108,10 @@ def run_baseline_models(df_train, df_val, df_test):
     results.append(metrics)
 
     plot_confusion_matrix(y_test, y_pred, "XGBoost")
-    plot_roc_curve(y_test, y_prob, "XGBoost")
     plot_pr_curve(y_test, y_prob, "XGBoost")
 
     # ==============================
-    # 5. RESULTADOS
+    # RESULTADOS
     # ==============================
     results_df = pd.DataFrame(results)
 
