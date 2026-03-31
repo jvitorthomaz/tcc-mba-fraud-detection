@@ -1,8 +1,3 @@
-''''
-
-python -m experiments.run_graph_transformer
-
-'''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -25,45 +20,48 @@ from src.utils.config import GCN_LR, GCN_EPOCHS
 
 
 # ==============================
-# 1. MODELO TRANSFORMER
+# 1. MODELO TGN CORRIGIDO
 # ==============================
 
-class GraphTransformer(nn.Module):
-    def __init__(self, in_channels, hidden_dim=64, num_heads=4):
+class TGN(nn.Module):
+    def __init__(self, in_channels, hidden_dim=64):
         super().__init__()
 
-        self.input_proj = nn.Linear(in_channels, hidden_dim)
+        self.memory_dim = hidden_dim
 
-        self.attention = nn.MultiheadAttention(
-            embed_dim=hidden_dim,
-            num_heads=num_heads,
-            batch_first=True
-        )
+        # memória por nó
+        self.memory = None
 
-        self.mlp = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, 2)
-        )
+        # atualiza memória
+        self.gru = nn.GRUCell(in_channels, hidden_dim)
+
+        # agora usa features + memória
+        self.lin = nn.Linear(in_channels + hidden_dim, 2)
+
+    def init_memory(self, num_nodes):
+        self.memory = torch.zeros((num_nodes, self.memory_dim))
 
     def forward(self, x):
-        # x: [N, F]
-
-        h = self.input_proj(x)        # [N, hidden]
-        h = h.unsqueeze(0)           # [1, N, hidden]
-
-        attn_out, _ = self.attention(h, h, h)
-
-        out = self.mlp(attn_out.squeeze(0))  # [N, 2]
-
+        # concatena informação atual + histórica
+        h = torch.cat([x, self.memory], dim=1)
+        out = self.lin(h)
         return out
+
+    def update_memory(self, x, node_indices):
+        updated_memory = self.gru(
+            x,
+            self.memory[node_indices]
+        )
+
+        # MUITO IMPORTANTE
+        self.memory[node_indices] = updated_memory.detach()
 
 
 # ==============================
 # 2. EVALUATION
 # ==============================
 
-def evaluate(model, data, df_all, df_split):
+def evaluate_tgn(model, data, df_all, df_split):
 
     model.eval()
 
@@ -84,15 +82,16 @@ def evaluate(model, data, df_all, df_split):
 # 3. PIPELINE
 # ==============================
 
-def run_graph_transformer(df_train, df_val, df_test, edges):
+def run_tgn(df_train, df_val, df_test, edges):
 
-    print("\n===== GRAPH TRANSFORMER MODEL =====")
+    print("\n===== TGN MODEL =====")
 
     df_all = pd.concat([df_train, df_val, df_test]).reset_index(drop=True)
 
     data = build_pyg_data(df_all, edges)
 
-    model = GraphTransformer(in_channels=data.num_features)
+    model = TGN(in_channels=data.num_features)
+    model.init_memory(data.num_nodes)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=GCN_LR)
 
@@ -113,57 +112,64 @@ def run_graph_transformer(df_train, df_val, df_test, edges):
         model.train()
         optimizer.zero_grad()
 
-        logits = model(data.x)
+        total_loss = 0
 
-        train_mask = df_all["time_step"] <= df_train["time_step"].max()
+        for ts in sorted(df_train["time_step"].unique()):
 
-        loss = F.cross_entropy(
-            logits[train_mask],
-            data.y[train_mask],
-            weight=weights
-        )
+            idx = df_all[df_all["time_step"] == ts].index.values
 
-        loss.backward()
+            logits = model(data.x)
+
+            loss = F.cross_entropy(
+                logits[idx],
+                data.y[idx],
+                weight=weights
+            )
+
+            total_loss += loss
+
+            # atualizar memória
+            x = data.x[idx]
+            model.update_memory(x, idx)
+
+        total_loss.backward()
         optimizer.step()
 
         if epoch % 10 == 0:
-            y_true_val, _, y_prob_val = evaluate(model, data, df_all, df_val)
+            y_true_val, _, y_prob_val = evaluate_tgn(model, data, df_all, df_val)
             val_pr_auc = average_precision_score(y_true_val, y_prob_val)
 
-            print(f"Epoch {epoch} | Loss {loss.item():.4f} | Val PR-AUC {val_pr_auc:.4f}")
+            print(f"Epoch {epoch} | Loss {total_loss.item():.4f} | Val PR-AUC {val_pr_auc:.4f}")
 
     # ==============================
     # TESTE
     # ==============================
-    y_true, y_pred, y_prob = evaluate(model, data, df_all, df_test)
+    y_true, y_pred, y_prob = evaluate_tgn(model, data, df_all, df_test)
 
     results = {
         "PR_AUC": average_precision_score(y_true, y_prob),
         "F1": f1_score(y_true, y_pred, zero_division=0),
         "Precision": precision_score(y_true, y_pred, zero_division=0),
         "Recall": recall_score(y_true, y_pred),
-        "model": "GraphTransformer"
+        "model": "TGN"
     }
 
-    print("\n===== RESULTADOS GRAPH TRANSFORMER =====")
+    print("\n===== RESULTADOS TGN =====")
     print(results)
 
     # ==============================
     # PLOTS
     # ==============================
     os.makedirs("results/figures", exist_ok=True)
-    plot_confusion_matrix(y_true, y_pred, "GraphTransformer")
-    plot_pr_curve(y_true, y_prob, "GraphTransformer")
+    plot_confusion_matrix(y_true, y_pred, "TGN")
+    plot_pr_curve(y_true, y_prob, "TGN")
 
     # ==============================
     # SALVAR CSV
     # ==============================
     os.makedirs("results/tables", exist_ok=True)
-    pd.DataFrame([results]).to_csv(
-        "results/tables/graph_transformer_results.csv",
-        index=False
-    )
+    pd.DataFrame([results]).to_csv("results/tables/tgn_results.csv", index=False)
 
-    print("\nResultados salvos em: results/tables/graph_transformer_results.csv")
+    print("\nResultados salvos em: results/tables/tgn_results.csv")
 
     return results
