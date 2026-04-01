@@ -2,70 +2,151 @@ import pandas as pd
 import numpy as np
 
 
-def add_graph_features(df: pd.DataFrame, edges: pd.DataFrame):
+def add_graph_features(df, edges):
+    print("\n===== GERANDO FEATURES DE GRAFO (SEM LEAKAGE) =====")
 
-    print("\n===== GERANDO FEATURES DE GRAFO =====")
+    df = df.copy().reset_index(drop=True)
 
-    df = df.copy()
+    id_map = {tx: i for i, tx in enumerate(df["txId"].values)}
+    n = len(df)
 
-    # ==============================
-    # 1. GRAU
-    # ==============================
-    degree = pd.concat([edges["txId1"], edges["txId2"]]).value_counts()
-    df["degree"] = df["txId"].map(degree).fillna(0)
+    feature_cols = [c for c in df.columns if c not in ["txId", "class", "time_step"]]
+    X = df[feature_cols].values
 
-    # ==============================
-    # 2. IN / OUT DEGREE
-    # ==============================
-    in_degree = edges["txId2"].value_counts()
-    out_degree = edges["txId1"].value_counts()
+    times = df["time_step"].values
 
-    df["in_degree"] = df["txId"].map(in_degree).fillna(0)
-    df["out_degree"] = df["txId"].map(out_degree).fillna(0)
+    neighbors = [[] for _ in range(n)]
 
-    # ==============================
-    # 3. VIZINHANÇA
-    # ==============================
-    feature_cols = [
-        col for col in df.columns
-        if col not in ["txId", "class"]
+    valid_edges = edges[
+        edges["txId1"].isin(id_map) & edges["txId2"].isin(id_map)
     ]
 
-    features_dict = df.set_index("txId")[feature_cols].to_dict(orient="index")
+    for _, row in valid_edges.iterrows():
+        i = id_map[row["txId1"]]
+        j = id_map[row["txId2"]]
 
-    neighbors = {}
+        # 🔴 FILTRO TEMPORAL (ESSENCIAL)
+        if times[j] <= times[i]:
+            neighbors[i].append(j)
+        if times[i] <= times[j]:
+            neighbors[j].append(i)
 
-    for _, row in edges.iterrows():
-        a, b = row["txId1"], row["txId2"]
+    # Grau
+    degree = np.array([len(neigh) for neigh in neighbors]).reshape(-1, 1)
 
-        neighbors.setdefault(a, []).append(b)
-        neighbors.setdefault(b, []).append(a)
+    # Média dos vizinhos
+    neighbor_mean = np.zeros_like(X)
 
-    neighbor_features = []
-
-    for tx in df["txId"]:
-        neighs = neighbors.get(tx, [])
-
-        if len(neighs) == 0:
-            neighbor_features.append([0] * len(feature_cols))
-            continue
-
-        vals = []
-
-        for n in neighs:
-            if n in features_dict:
-                vals.append(list(features_dict[n].values()))
-
-        if len(vals) == 0:
-            neighbor_features.append([0] * len(feature_cols))
+    for i in range(n):
+        if neighbors[i]:
+            neighbor_mean[i] = X[neighbors[i]].mean(axis=0)
         else:
-            neighbor_features.append(np.mean(vals, axis=0))
+            neighbor_mean[i] = 0
 
-    neighbor_features = np.array(neighbor_features)
+    df_degree = pd.DataFrame(degree, columns=["degree"])
 
-    for i, col in enumerate(feature_cols):
-        df[f"neighbor_mean_{col}"] = neighbor_features[:, i]
+    df_neighbor_mean = pd.DataFrame(
+        neighbor_mean,
+        columns=[f"neighbor_mean_{col}" for col in feature_cols]
+    )
 
-    print("Features de grafo adicionadas!")
+    df_final = pd.concat([df, df_degree, df_neighbor_mean], axis=1)
 
-    return df
+    print("Features de grafo adicionadas (sem leakage)!")
+
+    return df_final
+
+# import pandas as pd
+# import numpy as np
+
+
+# def add_graph_features(df, edges):
+#     """
+#     Adiciona features de vizinhança ao dataset:
+#     - Grau do nó
+#     - Média das features dos vizinhos
+
+#     Parâmetros:
+#         df: DataFrame com txId e features
+#         edges: DataFrame com colunas [txId1, txId2]
+
+#     Retorna:
+#         df com novas features
+#     """
+
+#     print("\n===== GERANDO FEATURES DE GRAFO =====")
+
+#     df = df.copy().reset_index(drop=True)
+
+#     # ==============================
+#     # MAPEAR IDS
+#     # ==============================
+
+#     id_map = {tx: i for i, tx in enumerate(df["txId"].values)}
+#     n = len(df)
+
+#     # ==============================
+#     # MATRIZ DE FEATURES
+#     # ==============================
+
+#     feature_cols = [c for c in df.columns if c not in ["txId", "class"]]
+#     X = df[feature_cols].values
+
+#     # ==============================
+#     # CRIAR LISTA DE VIZINHOS
+#     # ==============================
+
+#     neighbors = [[] for _ in range(n)]
+
+#     valid_edges = edges[
+#         edges["txId1"].isin(id_map) & edges["txId2"].isin(id_map)
+#     ]
+
+#     for _, row in valid_edges.iterrows():
+#         i = id_map[row["txId1"]]
+#         j = id_map[row["txId2"]]
+
+#         neighbors[i].append(j)
+#         neighbors[j].append(i)
+
+#     # ==============================
+#     # FEATURE: GRAU
+#     # ==============================
+
+#     degree = np.array([len(neigh) for neigh in neighbors]).reshape(-1, 1)
+
+#     # ==============================
+#     # FEATURE: MÉDIA DOS VIZINHOS
+#     # ==============================
+
+#     neighbor_mean = np.zeros_like(X)
+
+#     for i in range(n):
+#         if len(neighbors[i]) > 0:
+#             neighbor_mean[i] = X[neighbors[i]].mean(axis=0)
+#         else:
+#             neighbor_mean[i] = 0
+
+#     # ==============================
+#     # CONVERTER PARA DATAFRAME (UMA VEZ)
+#     # ==============================
+
+#     df_degree = pd.DataFrame(degree, columns=["degree"])
+
+#     df_neighbor_mean = pd.DataFrame(
+#         neighbor_mean,
+#         columns=[f"neighbor_mean_{col}" for col in feature_cols]
+#     )
+
+#     # ==============================
+#     # CONCAT FINAL (SEM FRAGMENTAÇÃO)
+#     # ==============================
+
+#     df_final = pd.concat(
+#         [df, df_degree, df_neighbor_mean],
+#         axis=1
+#     )
+
+#     print("Features de grafo adicionadas!")
+
+#     return df_final

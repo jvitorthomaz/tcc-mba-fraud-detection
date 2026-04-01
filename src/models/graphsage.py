@@ -110,8 +110,8 @@ def run_graphsage(df_train, df_val, df_test, edges):
     plot_confusion_matrix(y_true, y_pred, "GraphSAGE")
     plot_pr_curve(y_true, y_prob, "GraphSAGE")
 
-    os.makedirs("results/tables", exist_ok=True)
-    pd.DataFrame([results]).to_csv("results/tables/graphsage_results.csv", index=False)
+    os.makedirs("results/new_tables", exist_ok=True)
+    pd.DataFrame([results]).to_csv("results/new_tables/graphsage_results.csv", index=False)
 
     return results
 

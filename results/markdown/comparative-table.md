@@ -1,5 +1,6 @@
 # Comparative Table
 
+## Baseline
 | Modelo              | PR-AUC | F1-score | Precision | Recall |
 | ------------------- | ------ | -------- | --------- | ------ |
 | Logistic Regression | 0.212  | 0.252    | 0.145     | 0.944  |
@@ -10,6 +11,49 @@
 | GAT                 | 0.457  | 0.292    | 0.183     | 0.721  |
 | EvolveGCN           | 0.164  | 0.171    | 0.094     | 0.967  |
 | TGN                 | 0.207  | 0.248    | 0.144     | 0.900  |
+
+
+## Liste de Ajustes
+
+| Etapa              | Impacto | Prioridade |
+| ------------------ | ------- | ---------- |
+| Graph features     | 3       | Feito      |
+| Threshold tuning   | 3       | próxima    |
+| XGBoost tuning     | 3       | próxima    |
+| GraphSAGE tuning   | 2       | média      |
+| Regularização GNN  | 1       | média      |
+| Features temporais | 2       | depois     |
+| Pipeline temporal  | 3       | opcional   |
+
+
+
+## Rodada 1 de Ajustes
+
+| Modelo              | PR-AUC | F1-score | Precision | Recall |
+| ------------------- | ------ | -------- | --------- | ------ |
+| Logistic Regression | 0.280  | 0.341    | 0.230     | 0.665  |
+| Random Forest       | 0.781  | 0.818    | 0.938     | 0.725  |
+| XGBoost             | 0.803  | 0.798    | 0.892     | 0.722  |
+| GCN                 | 0.292  | 0.356    | 0.243     | 0.664  |
+| GraphSAGE           | 0.253  | 0.420    | 0.334     | 0.563  |
+| GAT                 | 0.307  | 0.409    | 0.293     | 0.677  |
+| EvolveGCN           | 0.341  | 0.230    | 0.134     | 0.808  |
+| TGN                 | 0.286  | 0.302    | 0.186     | 0.801  |
+
+
+## Rodada 2 de Ajustes (Sem data leakage)
+
+| Modelo              | PR-AUC | F1-score | Precision | Recall |
+| ------------------- | ------ | -------- | --------- | ------ |
+| Logistic Regression | 0.256  | 0.331    | 0.220     | 0.667  |
+| Random Forest       | 0.782  | 0.817    | 0.939     | 0.723  |
+| XGBoost             | 0.799  | 0.802    | 0.897     | 0.726  |
+| GCN                 | 0.231  | 0.385    | 0.271     | 0.665  |
+| GraphSAGE           | 0.326  | 0.449    | 0.373     | 0.561  |
+| GAT                 | 0.298  | 0.435    | 0.324     | 0.665  |
+| EvolveGCN           | 0.231  | 0.247    | 0.143     | 0.903  |
+| TGN                 | 0.251  | 0.224    | 0.128     | 0.889  |
+
 
 
 ## Leitura Técnica da Tabela (curta e forte)

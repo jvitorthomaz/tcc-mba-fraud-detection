@@ -110,8 +110,8 @@ def run_gat(df_train, df_val, df_test, edges):
     plot_confusion_matrix(y_true, y_pred, "GAT")
     plot_pr_curve(y_true, y_prob, "GAT")
 
-    os.makedirs("results/tables", exist_ok=True)
-    pd.DataFrame([results]).to_csv("results/tables/gat_results.csv", index=False)
+    os.makedirs("results/new_tables", exist_ok=True)
+    pd.DataFrame([results]).to_csv("results/new_tables/gat_results.csv", index=False)
 
     return results
 

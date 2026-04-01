@@ -167,9 +167,9 @@ def run_tgn(df_train, df_val, df_test, edges):
     # ==============================
     # SALVAR CSV
     # ==============================
-    os.makedirs("results/tables", exist_ok=True)
-    pd.DataFrame([results]).to_csv("results/tables/tgn_results.csv", index=False)
+    os.makedirs("results/new_tables", exist_ok=True)
+    pd.DataFrame([results]).to_csv("results/new_tables/tgn_results.csv", index=False)
 
-    print("\nResultados salvos em: results/tables/tgn_results.csv")
+    print("\nResultados salvos em: results/new_tables/tgn_results.csv")
 
     return results
