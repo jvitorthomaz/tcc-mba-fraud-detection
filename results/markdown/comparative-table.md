@@ -31,3 +31,8 @@ Os modelos temporais, EvolveGCN e TGN, apresentaram comportamento caracterizado 
 “Mesmo com maior complexidade, os modelos de grafos e temporais não superaram os modelos tabulares, o que evidencia que a qualidade da modelagem e da engenharia de features pode ser mais determinante do que a complexidade do modelo.”
 
 ## ENGENHARIA DE FEATURES PARA MELHORIAS DOS MODELOS???????
+
+
+Entendo que GCN otimizada, hiperparâmetros ajustados e uso correto de regularização, normalização e profundidade, treino por timestep, avaliação mais contralada, uso de early stopping com validação controlada são fatores que são interessante de serem trabalhados durante o processo de ajuste e melhoria dos modelos. Agora, porque já não usamos features locais (transação), features agregadas (vizinhança), features temporais e engenharia específica para fraude desde o começo (fizemos apenas features tabulares originais)? Porque não fizemos "grafo até o tempo t → prever t+1"?
+
+Acredito ser importate deixar claro essas escolhas e o motivos delas terem sido feitas em um paragrafo no texto do artigo
