@@ -19,7 +19,7 @@ def main():
 
     edges = pd.read_csv(EDGES_FILE)
 
-    # FEATURE ENGINEERING
+    print("\n===== GERANDO FEATURES DE GRAFO (SEM LEAKAGE) =====")
     df_all = pd.concat([df_train, df_val, df_test])
     df_all = add_graph_features(df_all, edges)
 
@@ -32,4 +32,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

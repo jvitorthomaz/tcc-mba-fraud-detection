@@ -18,12 +18,15 @@
 | Etapa              | Impacto | Prioridade |
 | ------------------ | ------- | ---------- |
 | Graph features     | 3       | Feito      |
-| Threshold tuning   | 3       | próxima    |
-| XGBoost tuning     | 3       | próxima    |
-| GraphSAGE tuning   | 2       | média      |
-| Regularização GNN  | 1       | média      |
-| Features temporais | 2       | depois     |
-| Pipeline temporal  | 3       | opcional   |
+| Threshold tuning   | 3       | Feito      |
+| Class weights      | 3       | Feito      |
+| Early stopping     | 3       | Feito      |
+| XGBoost tuning     | 3       | Próxima    |
+| GraphSAGE tuning   | 2       | Média      |
+| Regularização GNN  | 1       | Média      |
+| Features temporais | 2       | Depois     |
+| Pipeline temporal  | 3       | Opcional   |
+
 
 
 
@@ -55,28 +58,37 @@
 | TGN                 | 0.251  | 0.224    | 0.128     | 0.889  |
 
 
+## Rodada 3 de Ajustes: class weights, early stopping e threshold tuning
+### Antes de alterar e adicionar: best_val = -1 e best_state = model.state_dict()
+===== RESULTADOS =====
+                model    PR_AUC        F1  Precision    Recall
+0  LogisticRegression  0.229360  0.305906   0.195297  0.705448
+1        RandomForest  0.786939  0.786248   0.853896  0.728532
+2             XGBoost  0.800324  0.776251   0.828272  0.730379
 
-## Leitura Técnica da Tabela (curta e forte)
-- Melhor PR-AUC: XGBoost
-- Melhor F1-score: Random Forest
-- Melhor recall: EvolveGCN / Logistic / TGN
-- Melhor equilíbrio geral: XGBoost
+GCN
+{'PR_AUC': 0.3061666664797773, 'F1': 0.443024494142705, 'Precision': 0.35986159169550175, 'Recall': 0.5761772853185596, 'model': 'GCN'}
 
-## Texto explicativo
+===== RESULTADOS GRAPHSAGE =====
+{'PR_AUC': 0.2785704698745555, 'F1': 0.43188064389477815, 'Precision': 0.3756830601092896, 'Recall': 0.5078485687903971, 'model': 'GraphSAGE'}
 
-A Tabela apresenta a comparação entre os modelos avaliados considerando as métricas PR-AUC, F1-score, precisão e recall. Observa-se que os modelos tabulares, especialmente XGBoost e Random Forest, apresentam desempenho superior em relação às demais abordagens, com destaque para o XGBoost, que obteve o maior PR-AUC e um bom equilíbrio entre precisão e recall. O Random Forest, por sua vez, apresentou o maior F1-score, impulsionado por uma precisão elevada.
+===== RESULTADOS GAT =====
+{'PR_AUC': 0.29000854474451, 'F1': 0.46413199426111906, 'Precision': 0.37947214076246333, 'Recall': 0.5974145891043398, 'model': 'GAT'}
 
-Entre os modelos baseados em grafos, o GraphSAGE demonstrou o melhor desempenho geral, com o maior F1-score dentro desse grupo, enquanto o GAT apresentou maior PR-AUC, indicando melhor capacidade de ranqueamento das transações fraudulentas. O GCN apresentou desempenho mais limitado, sugerindo menor capacidade de captura de padrões complexos no grafo.
+===== RESULTADOS EVOLVE GCN =====
+{'PR_AUC': 0.2644962325122244, 'F1': 0.3357186669392762, 'Precision': 0.21559873949579833, 'Recall': 0.7580794090489381, 'model': 'EvolveGCN'}
 
-Os modelos temporais, EvolveGCN e TGN, apresentaram comportamento caracterizado por alto recall e baixa precisão, indicando tendência à superestimação da classe fraudulenta. Esse comportamento resulta em baixos valores de F1-score e PR-AUC, evidenciando limitações na configuração adotada para capturar dinâmicas temporais de forma eficaz.
+===== RESULTADOS TGN =====
+{'PR_AUC': 0.2981515813629563, 'F1': 0.3399638336347197, 'Precision': 0.2172573189522342, 'Recall': 0.7811634349030471, 'model': 'TGN'}
 
-## Insight
+### Depois de alterar e adicionar: best_val = -1 e best_state = model.state_dict()
 
-“Mesmo com maior complexidade, os modelos de grafos e temporais não superaram os modelos tabulares, o que evidencia que a qualidade da modelagem e da engenharia de features pode ser mais determinante do que a complexidade do modelo.”
+| Modelo    | PR-AUC | F1-score | Precision | Recall |
+| --------- | ------ | -------- | --------- | ------ |
+| GCN       | 0.332  | 0.460    | 0.416     | 0.513  |
+| GraphSAGE | 0.267  | 0.434    | 0.327     | 0.645  |
+| GAT       | 0.216  | 0.272    | 0.163     | 0.801  |
+| EvolveGCN | 0.285  | 0.321    | 0.202     | 0.774  |
+| TGN       | 0.174  | 0.297    | 0.185     | 0.759  |
 
-## ENGENHARIA DE FEATURES PARA MELHORIAS DOS MODELOS???????
 
-
-Entendo que GCN otimizada, hiperparâmetros ajustados e uso correto de regularização, normalização e profundidade, treino por timestep, avaliação mais contralada, uso de early stopping com validação controlada são fatores que são interessante de serem trabalhados durante o processo de ajuste e melhoria dos modelos. Agora, porque já não usamos features locais (transação), features agregadas (vizinhança), features temporais e engenharia específica para fraude desde o começo (fizemos apenas features tabulares originais)? Porque não fizemos "grafo até o tempo t → prever t+1"?
-
-Acredito ser importate deixar claro essas escolhas e o motivos delas terem sido feitas em um paragrafo no texto do artigo

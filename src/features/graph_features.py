@@ -25,7 +25,7 @@ def add_graph_features(df, edges):
         i = id_map[row["txId1"]]
         j = id_map[row["txId2"]]
 
-        # 🔴 FILTRO TEMPORAL (ESSENCIAL)
+        # FILTRO TEMPORAL (ESSENCIAL)
         if times[j] <= times[i]:
             neighbors[i].append(j)
         if times[i] <= times[j]:
