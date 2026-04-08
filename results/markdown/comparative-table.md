@@ -300,3 +300,70 @@ XGBoost             0.807826  0.820704   0.972187  0.710065
 RandomForest        0.793882  0.826341   0.972500  0.718375
 LogisticRegression  0.318930  0.476551   0.403587  0.581717
 Ensemble            0.797656  0.820350   0.962687  0.714681
+
+===== RESULTADOS GCN TEMPORAL =====
+{'PR_AUC': 0.7035481785950182, 'F1': 0.6518569940992711, 'Precision': 0.727906976744186, 'Recall': 0.5901948460087995, 'model': 'GCN_TEMPORAL'}
+
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+LogisticRegression  0.318930  0.476551   0.403587  0.581717
+RandomForest        0.793882  0.826341   0.972500  0.718375
+XGBoost             0.807826  0.820704   0.972187  0.710065
+Ensemble            0.797656  0.820350   0.962687  0.714681
+GCN_TEMPORAL        0.703548  0.651856   0.727906  0.590194
+
+
+O que melhorar GCN:
+- Ajuste fino (rápido ganho)
+- tuning de threshold focado em recall
+- aumentar epochs por step (20 → 30)
+- testar hidden_dim (64 → 128)
+
+
+===== RESULTADOS GRAPHSAGE TEMPORAL =====
+{'PR_AUC': 0.7031165069186897, 'F1': 0.6819252776842815, 'Precision': 0.7340579710144928, 'Recall': 0.6367064739157763, 'model': 'GraphSAGE_TEMPORAL'}
+
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+LogisticRegression  0.318930  0.476551   0.403587  0.581717
+RandomForest        0.793882  0.826341   0.972500  0.718375
+XGBoost             0.807826  0.820704   0.972187  0.710065
+Ensemble            0.797656  0.820350   0.962687  0.714681
+GCN_TEMPORAL        0.703548  0.651856   0.727906  0.590194
+GraphSage_Temporal  0.703116  0.681925   0.734057  0.636706
+
+
+===== RESULTADOS GAT =====
+{'PR_AUC': 0.28137133194306113, 'F1': 0.40988467874794066, 'Precision': 0.31864754098360654, 'Recall': 0.5743305632502308, 'model': 'GAT'}
+===== RESULTADOS GAT TEMPORAL =====
+{'PR_AUC': 0.6732799206023171, 'F1': 0.5991836734693877, 'Precision': 0.5283109404990403, 'Recall': 0.6920175989943432, 'model': 'GAT_TEMPORAL'}
+
+
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+LogisticRegression  0.318930  0.476551   0.403587  0.581717
+RandomForest        0.793882  0.826341   0.972500  0.718375
+XGBoost             0.807826  0.820704   0.972187  0.710065
+Ensemble            0.797656  0.820350   0.962687  0.714681
+GCN_TEMPORAL        0.703548  0.651856   0.727906  0.590194
+GraphSage_Temporal  0.703116  0.681925   0.734057  0.636706
+GAT_Temporal        0.673279  0.599183   0.528310  0.692017
+
+
+
+
+===== RESULTADOS EVOLVE GCN =====
+{'PR_AUC': 0.2619594247257695, 'F1': 0.3362978283350569, 'Precision': 0.21668443496801706, 'Recall': 0.7506925207756233, 'model': 'EvolveGCN'}
+===== RESULTADOS EVOLVE GCN TEMPORAL =====
+{'PR_AUC': 0.5014913151769682, 'F1': 0.5109018830525273, 'Precision': 0.42167689161554195, 'Recall': 0.6480201131363922, 'model': 'EvolveGCN_TEMPORAL_REAL'}
+
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+LogisticRegression  0.318930  0.476551   0.403587  0.581717
+RandomForest        0.793882  0.826341   0.972500  0.718375
+XGBoost             0.807826  0.820704   0.972187  0.710065
+Ensemble            0.797656  0.820350   0.962687  0.714681
+GCN_TEMPORAL        0.703548  0.651856   0.727906  0.590194
+GraphSage_Temporal  0.703116  0.681925   0.734057  0.636706
+GAT_Temporal        0.673279  0.599183   0.528310  0.692017
+EvolveGCN           0.501491  0.510901   0.421676  0.648020

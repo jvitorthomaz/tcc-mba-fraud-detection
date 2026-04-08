@@ -1,10 +1,9 @@
 ''''
-python -m experiments.run_gat
+python -m experiments.run_graphsage_temporal
 '''
-from src.data.split import get_elliptic_splits
-from src.models.gat import run_gat
-from src.models.gat_temporal import run_gat_temporal
 
+from src.data.split import get_elliptic_splits
+from src.models.graphsage_temporal import run_graphsage_temporal
 from src.features.graph_features import add_graph_features
 
 import pandas as pd
@@ -19,7 +18,7 @@ def main():
 
     edges = pd.read_csv(EDGES_FILE)
 
-    # FEATURE ENGINEERING
+    print("\n===== GERANDO FEATURES DE GRAFO (SEM LEAKAGE) =====")
     df_all = pd.concat([df_train, df_val, df_test])
     df_all = add_graph_features(df_all, edges)
 
@@ -27,8 +26,7 @@ def main():
     df_val = df_all[(df_all["time_step"] > 30) & (df_all["time_step"] <= 34)]
     df_test = df_all[df_all["time_step"] > 34]
 
-    run_gat(df_train, df_val, df_test, edges)
-    run_gat_temporal(df_train, df_val, df_test, edges)
+    run_graphsage_temporal(df_train, df_val, df_test, edges)
 
 
 if __name__ == "__main__":

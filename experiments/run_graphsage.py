@@ -1,7 +1,5 @@
 ''''
-
 python -m experiments.run_graphsage
-
 '''
 from src.data.split import get_elliptic_splits
 from src.models.graphsage import run_graphsage
