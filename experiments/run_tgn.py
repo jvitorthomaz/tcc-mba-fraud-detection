@@ -11,6 +11,7 @@ edge features
 '''
 from src.data.split import get_elliptic_splits
 from src.models.tgn import run_tgn
+from src.models.tgn_temporal import run_tgn_temporal
 from src.features.graph_features import add_graph_features
 
 import pandas as pd
@@ -48,6 +49,7 @@ def main():
     # RODAR MODELO
     # ==============================
     run_tgn(df_train, df_val, df_test, edges)
+    run_tgn_temporal(df_train, df_val, df_test, edges)
 
 
 if __name__ == "__main__":
