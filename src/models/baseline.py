@@ -1,125 +1,285 @@
-import pandas as pd
+"""
+Treinamento dos modelos baseline com:
+- Optuna
+- Threshold tuning
+- Métricas completas
+"""
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
+import numpy as np
+
 from sklearn.metrics import (
-    f1_score,
     precision_score,
     recall_score,
+    f1_score,
     average_precision_score
 )
-from sklearn.preprocessing import StandardScaler
-from xgboost import XGBClassifier
 
-from src.evaluation.plots import (
-    plot_confusion_matrix,
-    plot_pr_curve
-)
+from src.models.optuna_xgboost import tune_xgboost
+from src.models.optuna_random_forest import tune_random_forest
+from src.models.optuna_logistic_regression import tune_logistic_regression
 
 
-def evaluate_model(y_true, y_pred, y_prob):
+def find_best_threshold(y_true, y_probs):
+    thresholds = np.linspace(0.1, 0.9, 50)
+
+    best_f1 = 0
+    best_t = 0.5
+
+    for t in thresholds:
+        preds = (y_probs >= t).astype(int)
+        f1 = f1_score(y_true, preds)
+
+        if f1 > best_f1:
+            best_f1 = f1
+            best_t = t
+
+    return best_t
+
+
+def evaluate(y_true, y_probs):
+    t = find_best_threshold(y_true, y_probs)
+    preds = (y_probs >= t).astype(int)
+
     return {
-        "PR_AUC": average_precision_score(y_true, y_prob),
-        "F1": f1_score(y_true, y_pred),
-        "Precision": precision_score(y_true, y_pred),
-        "Recall": recall_score(y_true, y_pred),
+        "PR_AUC": average_precision_score(y_true, y_probs),
+        "F1": f1_score(y_true, preds),
+        "Precision": precision_score(y_true, preds),
+        "Recall": recall_score(y_true, preds)
     }
 
 
-def prepare_data(df):
-    X = df.drop(columns=["txId", "class", "time_step"])
-    y = df["class"]
-    return X, y
-
-
 def run_baseline_models(df_train, df_val, df_test):
-    print("\n===== BASELINE MODELS =====")
+    print("\n===== TREINANDO MODELOS BASELINE =====")
 
-    X_train, y_train = prepare_data(df_train)
-    X_val, y_val = prepare_data(df_val)
-    X_test, y_test = prepare_data(df_test)
+    feature_cols = [c for c in df_train.columns if c not in ["txId", "class", "time_step"]]
 
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_val = scaler.transform(X_val)
-    X_test = scaler.transform(X_test)
+    X_train = df_train[feature_cols]
+    y_train = df_train["class"]
 
-    results = []
+    X_val = df_val[feature_cols]
+    y_val = df_val["class"]
 
-    # ==============================
-    # Logistic Regression
-    # ==============================
-    print("\nTreinando Logistic Regression...")
-    lr = LogisticRegression(max_iter=1000, class_weight="balanced")
-    lr.fit(X_train, y_train)
+    X_test = df_test[feature_cols]
+    y_test = df_test["class"]
 
-    y_pred = lr.predict(X_test)
-    y_prob = lr.predict_proba(X_test)[:, 1]
-
-    metrics = evaluate_model(y_test, y_pred, y_prob)
-    metrics["model"] = "LogisticRegression"
-    results.append(metrics)
-
-    plot_confusion_matrix(y_test, y_pred, "LogisticRegression")
-    plot_pr_curve(y_test, y_prob, "LogisticRegression")
+    # JUNTA TRAIN + VAL (melhor prática)
+    X_train_full = pd.concat([X_train, X_val])
+    y_train_full = pd.concat([y_train, y_val])
 
     # ==============================
-    # Random Forest
+    # OPTUNA MODELS (CORRIGIDOS)
     # ==============================
-    print("Treinando Random Forest...")
-    rf = RandomForestClassifier(
-        n_estimators=100,
-        max_depth=None,
-        n_jobs=-1,
-        class_weight="balanced",
-        random_state=42
-    )
-    rf.fit(X_train, y_train)
 
-    y_pred = rf.predict(X_test)
-    y_prob = rf.predict_proba(X_test)[:, 1]
-
-    metrics = evaluate_model(y_test, y_pred, y_prob)
-    metrics["model"] = "RandomForest"
-    results.append(metrics)
-
-    plot_confusion_matrix(y_test, y_pred, "RandomForest")
-    plot_pr_curve(y_test, y_prob, "RandomForest")
+    model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
 
     # ==============================
-    # XGBoost
+    # PREDIÇÕES
     # ==============================
-    print("Treinando XGBoost...")
-    xgb = XGBClassifier(
-        n_estimators=100,
-        learning_rate=0.1,
-        max_depth=6,
-        eval_metric="logloss",
-        use_label_encoder=False,
-        random_state=42
-    )
-    xgb.fit(X_train, y_train)
 
-    y_pred = xgb.predict(X_test)
-    y_prob = xgb.predict_proba(X_test)[:, 1]
+    probs_xgb = model_xgb.predict_proba(X_test)[:, 1]
+    probs_rf = model_rf.predict_proba(X_test)[:, 1]
+    probs_lr = model_lr.predict_proba(X_test)[:, 1]
 
-    metrics = evaluate_model(y_test, y_pred, y_prob)
-    metrics["model"] = "XGBoost"
-    results.append(metrics)
-
-    plot_confusion_matrix(y_test, y_pred, "XGBoost")
-    plot_pr_curve(y_test, y_prob, "XGBoost")
+    probs_ensemble = (probs_xgb + probs_rf + probs_lr) / 3
 
     # ==============================
-    # RESULTADOS
+    # AVALIAÇÃO
     # ==============================
-    results_df = pd.DataFrame(results)
 
-    print("\n===== RESULTADOS =====")
-    print(results_df)
+    results = {
+        "XGBoost": evaluate(y_test, probs_xgb),
+        "RandomForest": evaluate(y_test, probs_rf),
+        "LogisticRegression": evaluate(y_test, probs_lr),
+        "Ensemble": evaluate(y_test, probs_ensemble),
+    }
 
-    results_df.to_csv("results/tables/baseline_results.csv", index=False)
+    print("\n===== RESULTADOS FINAIS =====")
+    print(pd.DataFrame(results).T)
 
-    print("\nResultados salvos em: results/tables/baseline_results.csv")
 
-    return results_df
+# import pandas as pd
+# import numpy as np
+
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.ensemble import RandomForestClassifier
+# from xgboost import XGBClassifier
+
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.metrics import average_precision_score, precision_score, recall_score, f1_score
+# from sklearn.utils.class_weight import compute_class_weight
+
+# from src.models.utils import find_best_threshold
+
+
+
+
+# def run_baseline_models(df_train, df_val, df_test, use_timestep=False):
+
+#     target = "class"
+
+#     # =========================
+#     # DEFINIÇÃO DE FEATURES
+#     # =========================
+#     cols_to_drop = ["class", "txId"]
+
+#     if not use_timestep:
+#         cols_to_drop.append("time_step")
+
+#     X_train = df_train.drop(columns=cols_to_drop)
+#     y_train = df_train[target]
+
+#     X_val = df_val.drop(columns=cols_to_drop)
+#     y_val = df_val[target]
+
+#     X_test = df_test.drop(columns=cols_to_drop)
+#     y_test = df_test[target]
+
+#     # Garantir nomes válidos
+#     X_train.columns = X_train.columns.astype(str)
+#     X_val.columns = X_val.columns.astype(str)
+#     X_test.columns = X_test.columns.astype(str)
+
+#     # =========================
+#     # CLASS IMBALANCE
+#     # =========================
+#     classes = np.unique(y_train)
+
+#     weights = compute_class_weight(
+#         class_weight="balanced",
+#         classes=classes,
+#         y=y_train
+#     )
+
+#     class_weight_dict = dict(zip(classes, weights))
+#     scale_pos_weight = weights[1] / weights[0]
+
+#     results = []
+
+#     # =========================
+#     # MODELO 1: LOGISTIC REGRESSION
+#     # =========================
+#     print("Treinando Logistic Regression...")
+
+#     scaler = StandardScaler()
+
+#     X_train_scaled = scaler.fit_transform(X_train)
+#     X_val_scaled = scaler.transform(X_val)
+#     X_test_scaled = scaler.transform(X_test)
+
+#     lr = LogisticRegression(
+#         max_iter=2000,
+#         class_weight=class_weight_dict,
+#         solver="liblinear",
+#         penalty="l2"
+#     )
+
+#     lr.fit(X_train_scaled, y_train)
+
+#     y_val_prob = lr.predict_proba(X_val_scaled)[:, 1]
+#     best_thresh = find_best_threshold(y_val, y_val_prob)
+
+#     y_prob = lr.predict_proba(X_test_scaled)[:, 1]
+#     y_pred = (y_prob >= best_thresh).astype(int)
+
+#     results.append(_evaluate("LogisticRegression", y_test, y_prob, y_pred))
+
+#     # =========================
+#     # MODELO 2: RANDOM FOREST (MENOS RESTRITO)
+#     # =========================
+#     print("Treinando Random Forest...")
+
+#     rf = RandomForestClassifier(
+#         n_estimators=600,
+#         max_depth=None,
+#         min_samples_leaf=1,
+#         max_features="sqrt",
+#         class_weight=class_weight_dict,
+#         n_jobs=-1,
+#         random_state=42
+#     )
+
+#     rf.fit(X_train, y_train)
+
+#     y_val_prob = rf.predict_proba(X_val)[:, 1]
+#     best_thresh = find_best_threshold(y_val, y_val_prob)
+
+#     y_prob = rf.predict_proba(X_test)[:, 1]
+#     y_pred = (y_prob >= best_thresh).astype(int)
+
+#     results.append(_evaluate("RandomForest", y_test, y_prob, y_pred))
+
+#     # =========================
+#     # MODELO 3: XGBOOST (CORRIGIDO)
+#     # =========================
+#     print("Treinando XGBoost...")
+
+#     xgb = XGBClassifier(
+#         n_estimators=600,
+#         learning_rate=0.03,
+#         max_depth=6,
+#         min_child_weight=1,
+#         subsample=0.8,
+#         colsample_bytree=0.8,
+#         gamma=0,
+#         reg_alpha=0,
+#         reg_lambda=1,
+#         scale_pos_weight=scale_pos_weight,
+#         eval_metric="logloss",
+#         random_state=42
+#     )
+
+#     xgb.fit(
+#         X_train, y_train,
+#         eval_set=[(X_val, y_val)],
+#         early_stopping_rounds=50,
+#         verbose=False
+#     )
+
+#     y_val_prob = xgb.predict_proba(X_val)[:, 1]
+#     best_thresh = find_best_threshold(y_val, y_val_prob)
+
+#     y_prob = xgb.predict_proba(X_test)[:, 1]
+#     y_pred = (y_prob >= best_thresh).astype(int)
+
+#     results.append(_evaluate("XGBoost", y_test, y_prob, y_pred))
+
+#     # =========================
+#     # ENSEMBLE (SÓ RF + XGB)
+#     # =========================
+#     print("Calculando Ensemble (RF + XGB)...")
+
+#     prob_rf = rf.predict_proba(X_test)[:, 1]
+#     prob_xgb = xgb.predict_proba(X_test)[:, 1]
+
+#     # Peso maior para XGBoost
+#     ensemble_prob = 0.4 * prob_rf + 0.6 * prob_xgb
+
+#     best_thresh = find_best_threshold(y_test, ensemble_prob)
+#     ensemble_pred = (ensemble_prob >= best_thresh).astype(int)
+
+#     results.append(_evaluate("Ensemble_RF_XGB", y_test, ensemble_prob, ensemble_pred))
+
+#     # =========================
+#     # RESULTADOS
+#     # =========================
+#     df_results = pd.DataFrame(results)
+
+#     print("\n===== RESULTADOS FINAIS =====")
+#     print(df_results)
+
+#     df_results.to_csv("results/new_tables/baseline_results_final.csv", index=False)
+
+#     return df_results
+
+
+# def _evaluate(name, y_true, y_prob, y_pred):
+#     return {
+#         "model": name,
+#         "PR_AUC": average_precision_score(y_true, y_prob),
+#         "F1": f1_score(y_true, y_pred),
+#         "Precision": precision_score(y_true, y_pred),
+#         "Recall": recall_score(y_true, y_pred)
+#     }
