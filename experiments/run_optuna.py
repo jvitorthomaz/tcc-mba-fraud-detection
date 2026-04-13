@@ -17,7 +17,7 @@ from src.models.optuna_xgboost import tune_xgboost
 from src.models.optuna_random_forest import tune_random_forest
 from src.models.optuna_logistic_regression import tune_logistic_regression
 
-from src.models.baseline import evaluate
+from src.models.preliminary.baseline import evaluate
 
 from src.utils.config import FEATURES_FILE, CLASSES_FILE, EDGES_FILE
 

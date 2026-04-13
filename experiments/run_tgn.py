@@ -10,7 +10,7 @@ edge features
 
 '''
 from src.data.split import get_elliptic_splits
-from src.models.tgn import run_tgn
+from src.models.preliminary.tgn import run_tgn
 from src.models.tgn_temporal import run_tgn_temporal
 from src.features.graph_features import add_graph_features
 

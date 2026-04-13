@@ -2,7 +2,7 @@
 python -m experiments.run_gat
 '''
 from src.data.split import get_elliptic_splits
-from src.models.gat import run_gat
+from src.models.preliminary.gat import run_gat
 from src.models.gat_temporal import run_gat_temporal
 
 from src.features.graph_features import add_graph_features

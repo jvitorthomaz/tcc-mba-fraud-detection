@@ -2,7 +2,7 @@
 python -m experiments.run_graphsage
 '''
 from src.data.split import get_elliptic_splits
-from src.models.graphsage import run_graphsage
+from src.models.preliminary.graphsage import run_graphsage
 from src.features.graph_features import add_graph_features
 
 import pandas as pd

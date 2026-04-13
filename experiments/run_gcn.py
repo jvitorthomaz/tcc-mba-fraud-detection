@@ -2,7 +2,7 @@
 python -m experiments.run_gcn
 '''
 from src.data.split import get_elliptic_splits
-from src.models.gcn import run_gcn
+from src.models.preliminary.gcn import run_gcn
 from src.models.gcn_temporal import run_gcn_temporal
 from src.features.graph_features import add_graph_features
 

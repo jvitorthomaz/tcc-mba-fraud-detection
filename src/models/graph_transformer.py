@@ -14,7 +14,7 @@ from sklearn.metrics import (
     average_precision_score
 )
 
-from src.models.gcn import build_pyg_data
+from src.models.preliminary.gcn import build_pyg_data
 from src.evaluation.plots import plot_confusion_matrix, plot_pr_curve
 
 import pandas as pd
