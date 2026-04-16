@@ -171,7 +171,7 @@ def run_evolve_gcn_temporal(df_train, df_val, df_test, edges):
 
         for epoch in range(10):
 
-            # 🔥 evita erro de backward
+            # evita erro de backward
             if h is not None:
                 h = h.detach()
 
@@ -196,7 +196,7 @@ def run_evolve_gcn_temporal(df_train, df_val, df_test, edges):
             continue
 
         with torch.no_grad():
-            logits_eval, _ = model(x_eval, edge_eval, None)  # 🔥 sem h!
+            logits_eval, _ = model(x_eval, edge_eval, None)  # sem h!
             probs = torch.sigmoid(logits_eval).cpu().numpy()
 
         idx_target = (df_eval["time_step"] == (t + 1)).values

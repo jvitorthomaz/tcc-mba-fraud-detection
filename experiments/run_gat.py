@@ -27,7 +27,7 @@ def main():
     df_val = df_all[(df_all["time_step"] > 30) & (df_all["time_step"] <= 34)]
     df_test = df_all[df_all["time_step"] > 34]
 
-    run_gat(df_train, df_val, df_test, edges)
+    # run_gat(df_train, df_val, df_test, edges)
     run_gat_temporal(df_train, df_val, df_test, edges)
 
 

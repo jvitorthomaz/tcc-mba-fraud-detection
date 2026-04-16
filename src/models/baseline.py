@@ -5,6 +5,7 @@ Treinamento dos modelos baseline com:
 - Métricas completas
 """
 
+import os
 import pandas as pd
 import numpy as np
 
@@ -19,7 +20,22 @@ from src.models.optuna_xgboost import tune_xgboost
 from src.models.optuna_random_forest import tune_random_forest
 from src.models.optuna_logistic_regression import tune_logistic_regression
 
+# plots
+from src.evaluation.plots import (
+    plot_confusion_matrix,
+    plot_pr_curve
+)
 
+
+# ==============================
+# GARANTE PASTA DE OUTPUT
+# ==============================
+os.makedirs("results/figures", exist_ok=True)
+
+
+# ==============================
+# THRESHOLD OTIMIZADO (F1)
+# ==============================
 def find_best_threshold(y_true, y_probs):
     thresholds = np.linspace(0.1, 0.9, 50)
 
@@ -28,7 +44,7 @@ def find_best_threshold(y_true, y_probs):
 
     for t in thresholds:
         preds = (y_probs >= t).astype(int)
-        f1 = f1_score(y_true, preds)
+        f1 = f1_score(y_true, preds, zero_division=0)
 
         if f1 > best_f1:
             best_f1 = f1
@@ -37,22 +53,38 @@ def find_best_threshold(y_true, y_probs):
     return best_t
 
 
-def evaluate(y_true, y_probs):
+# ==============================
+# AVALIAÇÃO COMPLETA + PLOTS
+# ==============================
+def evaluate(y_true, y_probs, model_name):
     t = find_best_threshold(y_true, y_probs)
     preds = (y_probs >= t).astype(int)
 
+    # ======================
+    # PLOTS (SALVA AUTOMATICAMENTE)
+    # ======================
+    plot_confusion_matrix(y_true, preds, model_name)
+    plot_pr_curve(y_true, y_probs, model_name)
+
     return {
         "PR_AUC": average_precision_score(y_true, y_probs),
-        "F1": f1_score(y_true, preds),
-        "Precision": precision_score(y_true, preds),
-        "Recall": recall_score(y_true, preds)
+        "F1": f1_score(y_true, preds, zero_division=0),
+        "Precision": precision_score(y_true, preds, zero_division=0),
+        "Recall": recall_score(y_true, preds, zero_division=0),
+        "Threshold": t
     }
 
 
+# ==============================
+# MAIN
+# ==============================
 def run_baseline_models(df_train, df_val, df_test):
     print("\n===== TREINANDO MODELOS BASELINE =====")
 
-    feature_cols = [c for c in df_train.columns if c not in ["txId", "class", "time_step"]]
+    feature_cols = [
+        c for c in df_train.columns
+        if c not in ["txId", "class", "time_step"]
+    ]
 
     X_train = df_train[feature_cols]
     y_train = df_train["class"]
@@ -63,22 +95,33 @@ def run_baseline_models(df_train, df_val, df_test):
     X_test = df_test[feature_cols]
     y_test = df_test["class"]
 
-    # JUNTA TRAIN + VAL (melhor prática)
+    # ==============================
+    # TREINO FINAL = TRAIN + VAL
+    # ==============================
     X_train_full = pd.concat([X_train, X_val])
     y_train_full = pd.concat([y_train, y_val])
 
     # ==============================
-    # OPTUNA MODELS (CORRIGIDOS)
+    # MODELOS (OPTUNA)
     # ==============================
+    model_xgb = tune_xgboost(
+        X_train, y_train, X_val, y_val,
+        X_train_full, y_train_full
+    )
 
-    model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    model_rf = tune_random_forest(
+        X_train, y_train, X_val, y_val,
+        X_train_full, y_train_full
+    )
+
+    model_lr = tune_logistic_regression(
+        X_train, y_train, X_val, y_val,
+        X_train_full, y_train_full
+    )
 
     # ==============================
     # PREDIÇÕES
     # ==============================
-
     probs_xgb = model_xgb.predict_proba(X_test)[:, 1]
     probs_rf = model_rf.predict_proba(X_test)[:, 1]
     probs_lr = model_lr.predict_proba(X_test)[:, 1]
@@ -86,18 +129,129 @@ def run_baseline_models(df_train, df_val, df_test):
     probs_ensemble = (probs_xgb + probs_rf + probs_lr) / 3
 
     # ==============================
-    # AVALIAÇÃO
+    # AVALIAÇÃO + PLOTS
     # ==============================
-
     results = {
-        "XGBoost": evaluate(y_test, probs_xgb),
-        "RandomForest": evaluate(y_test, probs_rf),
-        "LogisticRegression": evaluate(y_test, probs_lr),
-        "Ensemble": evaluate(y_test, probs_ensemble),
+        "XGBoost": evaluate(y_test, probs_xgb, "XGBoost"),
+        "RandomForest": evaluate(y_test, probs_rf, "RandomForest"),
+        "LogisticRegression": evaluate(y_test, probs_lr, "LogisticRegression"),
+        "Ensemble": evaluate(y_test, probs_ensemble, "Ensemble"),
     }
 
+    # ==============================
+    # OUTPUT FINAL
+    # ==============================
     print("\n===== RESULTADOS FINAIS =====")
-    print(pd.DataFrame(results).T)
+    results_df = pd.DataFrame(results).T
+    print(results_df)
+
+    # salva CSV (útil pro artigo)
+    results_df.to_csv("results/baseline_results.csv")
+
+    return results_df
+
+
+
+
+# import pandas as pd
+# import numpy as np
+
+# from sklearn.metrics import (
+#     precision_score,
+#     recall_score,
+#     f1_score,
+#     average_precision_score
+# )
+
+# from src.models.optuna_xgboost import tune_xgboost
+# from src.models.optuna_random_forest import tune_random_forest
+# from src.models.optuna_logistic_regression import tune_logistic_regression
+
+
+# def find_best_threshold(y_true, y_probs):
+#     thresholds = np.linspace(0.1, 0.9, 50)
+
+#     best_f1 = 0
+#     best_t = 0.5
+
+#     for t in thresholds:
+#         preds = (y_probs >= t).astype(int)
+#         f1 = f1_score(y_true, preds)
+
+#         if f1 > best_f1:
+#             best_f1 = f1
+#             best_t = t
+
+#     return best_t
+
+
+# def evaluate(y_true, y_probs):
+#     t = find_best_threshold(y_true, y_probs)
+#     preds = (y_probs >= t).astype(int)
+
+#     return {
+#         "PR_AUC": average_precision_score(y_true, y_probs),
+#         "F1": f1_score(y_true, preds),
+#         "Precision": precision_score(y_true, preds),
+#         "Recall": recall_score(y_true, preds)
+#     }
+
+
+# def run_baseline_models(df_train, df_val, df_test):
+#     print("\n===== TREINANDO MODELOS BASELINE =====")
+
+#     feature_cols = [c for c in df_train.columns if c not in ["txId", "class", "time_step"]]
+
+#     X_train = df_train[feature_cols]
+#     y_train = df_train["class"]
+
+#     X_val = df_val[feature_cols]
+#     y_val = df_val["class"]
+
+#     X_test = df_test[feature_cols]
+#     y_test = df_test["class"]
+
+#     # JUNTA TRAIN + VAL (melhor prática)
+#     X_train_full = pd.concat([X_train, X_val])
+#     y_train_full = pd.concat([y_train, y_val])
+
+#     # ==============================
+#     # OPTUNA MODELS (CORRIGIDOS)
+#     # ==============================
+
+#     model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+#     model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+#     model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+
+#     # ==============================
+#     # PREDIÇÕES
+#     # ==============================
+
+#     probs_xgb = model_xgb.predict_proba(X_test)[:, 1]
+#     probs_rf = model_rf.predict_proba(X_test)[:, 1]
+#     probs_lr = model_lr.predict_proba(X_test)[:, 1]
+
+#     probs_ensemble = (probs_xgb + probs_rf + probs_lr) / 3
+
+#     # ==============================
+#     # AVALIAÇÃO
+#     # ==============================
+
+#     results = {
+#         "XGBoost": evaluate(y_test, probs_xgb),
+#         "RandomForest": evaluate(y_test, probs_rf),
+#         "LogisticRegression": evaluate(y_test, probs_lr),
+#         "Ensemble": evaluate(y_test, probs_ensemble),
+#     }
+
+
+#     print("\n===== RESULTADOS FINAIS =====")
+#     print(pd.DataFrame(results).T)
+
+
+
+
+
 
 
 # import pandas as pd
