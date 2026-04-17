@@ -218,7 +218,7 @@ TGN_Temporal
 
 
 ## ----------------------------------------------------------------------------
-
+## rodada 1
 ===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
 {'C': 9.899964602858315, 'class_weight': None}
 ===== MELHORES PARÂMETROS RANDOM FOREST =====
@@ -232,3 +232,32 @@ XGBoost             0.805814  0.822529   0.968711  0.714681
 RandomForest        0.795575  0.820730   0.960396  0.716528
 LogisticRegression  0.318542  0.477612   0.407843  0.576177
 Ensemble            0.795810  0.805263   0.936353  0.706371
+
+## ----------------------------------------------------------------------------
+## rodada 2
+===== MELHORES PARÂMETROS XGBOOST =====
+{'n_estimators': 503, 'max_depth': 8, 'learning_rate': 0.029700835355476407, 'subsample': 0.9998311111721847, 'colsample_bytree': 0.9985411440929729, 'min_child_weight': 2, 'gamma': 3.5950873897451108, 'reg_alpha': 3.5948409271845443, 'reg_lambda': 1.1544294613475528, 'scale_pos_weight': 7.892268052067664} | PR-AUC: 0.9966
+===== MELHORES PARÂMETROS RANDOM FOREST =====
+{'n_estimators': 358, 'max_depth': 14, 'min_samples_split': 9, 'min_samples_leaf': 5, 'max_features': 'sqrt', 'class_weight': 'balanced'} | PR-AUC: 0.9922
+===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
+{'C': 0.02281334680188677, 'class_weight': None}
+{'C': 0.02281334680188677, 'class_weight': None} | PR-AUC: 0.6848
+
+===== RESULTADOS FINAIS =====
+MODELO                PR_AUC        F1  Precision    Recall  Threshold
+XGBoost             0.804583  0.820075   0.972152  0.709141   0.900000
+RandomForest        0.794613  0.819188   0.954545  0.717452   0.606122
+LogisticRegression  0.415582  0.543618   0.540639  0.546630   0.720408
+Ensemble            0.793992  0.802548   0.943820  0.698061   0.655102
+
+
+
+## --------------------------GRAFOS----------------------------
+
+===== RESULTADOS FINAIS =====
+MODELO                PR_AUC        F1  Precision    Recall
+GCN_TEMPORAL        0.703548  0.651856   0.727906  0.590194
+GraphSage_Temporal  0.703116  0.681925   0.734057  0.636706
+GAT_Temporal        0.673279  0.599183   0.528310  0.692017
+EvolveGCN           0.501491  0.510901   0.421676  0.648020
+TGN_Temporal        
