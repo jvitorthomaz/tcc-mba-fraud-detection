@@ -3,36 +3,6 @@
 python3.10 -m venv venv                                                    
 source venv/bin/activate
 
-## Baseline
-| Modelo              | PR-AUC | F1-score | Precision | Recall |
-| ------------------- | ------ | -------- | --------- | ------ |
-| Logistic Regression | 0.212  | 0.252    | 0.145     | 0.944  |
-| Random Forest       | 0.783  | 0.800    | 0.986     | 0.673  |
-| XGBoost             | 0.799  | 0.784    | 0.861     | 0.719  |
-| GCN                 | 0.247  | 0.320    | 0.206     | 0.721  |
-| GraphSAGE           | 0.356  | 0.460    | 0.346     | 0.684  |
-| GAT                 | 0.457  | 0.292    | 0.183     | 0.721  |
-| EvolveGCN           | 0.164  | 0.171    | 0.094     | 0.967  |
-| TGN                 | 0.207  | 0.248    | 0.144     | 0.900  |
-
-
-## Liste de Ajustes
-
-| Etapa              | Impacto | Prioridade |
-| ------------------ | ------- | ---------- |
-| Graph features     | 3       | Feito      |
-| Threshold tuning   | 3       | Feito      |
-| Class weights      | 3       | Feito      |
-| Early stopping     | 3       | Feito      |
-| XGBoost tuning     | 3       | Próxima    |
-| GraphSAGE tuning   | 2       | Média      |
-| Regularização GNN  | 1       | Média      |
-| Features temporais | 2       | Depois     |
-| Pipeline temporal  | 3       | Opcional   |
-
-
-
-
 ## Rodada 1 de Ajustes
 
 | Modelo              | PR-AUC | F1-score | Precision | Recall |
@@ -95,28 +65,6 @@ GCN
 | TGN       | 0.174  | 0.297    | 0.185     | 0.759  |
 
 
-===== RESULTADOS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.227072  0.308877   0.197871  0.703601
-1        RandomForest  0.781757  0.761490   0.799797  0.726685
-2             XGBoost  0.804513  0.774006   0.815117  0.736842
-
-
-
-===== RESULTADOS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.238691  0.297553   0.188018  0.712835
-1        RandomForest  0.785386  0.750831   0.772461  0.730379
-2             XGBoost  0.799893  0.760859   0.787549  0.735919
-
-
-
-===== RESULTADOS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.226824  0.308910   0.197971  0.702678
-1        RandomForest  0.788800  0.758258   0.787276  0.731302
-2             XGBoost  0.797570  0.782007   0.841489  0.730379
-
 
 ===== RESULTADOS FINAIS =====
                 model    PR_AUC        F1  Precision    Recall
@@ -124,14 +72,6 @@ GCN
 1        RandomForest  0.784590  0.750478   0.777998  0.724838
 2             XGBoost  0.794278  0.746818   0.763006  0.731302
 3            Ensemble  0.791499  0.802728   0.929526  0.706371
-
-
-===== RESULTADOS FINAIS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.236108  0.299443   0.189078  0.719298
-1        RandomForest  0.789679  0.808050   0.915789  0.722992
-2             XGBoost  0.798488  0.794949   0.877369  0.726685
-3     Ensemble_RF_XGB  0.797156  0.822961   0.982074  0.708218
 
 
 ===== RESULTADOS FINAIS =====
@@ -252,6 +192,37 @@ Ensemble            0.793992  0.802548   0.943820  0.698061   0.655102
 
 
 
+===== MELHORES PARÂMETROS XGBOOST =====
+{'n_estimators': 783, 'max_depth': 10, 'learning_rate': 0.015100332029457502, 'subsample': 0.999818919891117, 'colsample_bytree': 0.8481088824170445, 'min_child_weight': 5, 'gamma': 2.5550090067584246, 'reg_alpha': 2.643811149817767, 'reg_lambda': 1.1420684146941757, 'scale_pos_weight': 6.950609272915716}
+{'n_estimators': 783, 'max_depth': 10, 'learning_rate': 0.015100332029457502, 'subsample': 0.999818919891117, 'colsample_bytree': 0.8481088824170445, 'min_child_weight': 5, 'gamma': 2.5550090067584246, 'reg_alpha': 2.643811149817767, 'reg_lambda': 1.1420684146941757, 'scale_pos_weight': 6.950609272915716} | PR-AUC: 0.9966
+===== MELHORES PARÂMETROS RANDOM FOREST =====
+{'n_estimators': 353, 'max_depth': 15, 'min_samples_split': 8, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'class_weight': 'balanced'}
+{'n_estimators': 353, 'max_depth': 15, 'min_samples_split': 8, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'class_weight': 'balanced'} | PR-AUC: 0.9925
+===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
+{'C': 0.022013290906413338, 'class_weight': None}
+{'C': 0.022013290906413338, 'class_weight': None} | PR-AUC: 0.6848
+
+===== RESULTADOS COMPLETOS =====
+MODELO                      PR_AUC        F1  Precision    Recall  Threshold
+XGBoost_Test              0.804379  0.745007   0.749533  0.740536   0.410204
+RandomForest_Test         0.795215  0.813347   0.934132  0.720222   0.524490
+LogisticRegression_Test   0.415876  0.507595   0.423886  0.632502   0.573469
+
+
+===== RESULTADOS COMPLETOS =====
+MODELO                      PR_AUC        F1  Precision    Recall  Threshold
+XGBoost_Train             0.999994       NaN        NaN       NaN        NaN
+XGBoost_Val               0.999969  0.999017   0.998035  1.000000        NaN
+XGBoost_Test              0.804379  0.745007   0.749533  0.740536   0.410204
+RandomForest_Train        0.999716       NaN        NaN       NaN        NaN
+RandomForest_Val          0.999937  0.999017   0.998035  1.000000        NaN
+RandomForest_Test         0.795215  0.813347   0.934132  0.720222   0.524490
+LogisticRegression_Train  0.869161       NaN        NaN       NaN        NaN
+LogisticRegression_Val    0.830665  0.818363   0.829960  0.807087        NaN
+LogisticRegression_Test   0.415876  0.507595   0.423886  0.632502   0.573469
+
+
+
 ## --------------------------GRAFOS----------------------------
 
 ===== RESULTADOS FINAIS =====
@@ -261,3 +232,47 @@ GraphSage_Temporal  0.703116  0.681925   0.734057  0.636706
 GAT_Temporal        0.673279  0.599183   0.528310  0.692017
 EvolveGCN           0.501491  0.510901   0.421676  0.648020
 TGN_Temporal        
+
+
+## GCN
+===== MELHORES PARÂMETROS GCN =====
+{'hidden_dim': 256, 'lr': 0.0028956146453530513, 'dropout': 0.5952925716514567, 'weight_decay': 0.00048273044132717376}
+
+===== RESULTADOS GCN =====
+{'PR_AUC': 0.759437367372766, 'F1': 0.6812004530011325, 'Precision': 0.6197836166924265, 'Recall': 0.7561282212445003, 'model': 'GCN_TEMPORAL'}
+
+===== MELHORES PARÂMETROS GCN =====
+{'hidden_dim': 256, 'lr': 0.0013218368325703402, 'dropout': 0.20550589596037555, 'weight_decay': 0.0009504533757483284}
+
+===== RESULTADOS GCN  =====
+{'PR_AUC': 0.7239495839842318, 'F1': 0.6320043103448276, 'Precision': 0.553041018387553, 'Recall': 0.7372721558768071, 'model': 'GCN'}
+
+### Versão inicial das melhorias
+===== MELHORES PARÂMETROS GRAPHSAGE =====
+{'hidden_dim': 128, 'lr': 0.002888874568265193, 'dropout': 0.24752627452777007, 'weight_decay': 0.00014243209619628516}
+
+===== RESULTADOS GRAPHSAGE =====
+{'PR_AUC': 0.7195272425004758, 'F1': 0.7267851156553805, 'Precision': 0.7787356321839081, 'Recall': 0.6813324952859836}
+
+### Versão atualizada das melhorias
+
+===== MELHORES PARÂMETROS GRAPHSAGE =====
+{'hidden_dim': 128, 'lr': 0.0021183760207006386, 'dropout': 0.4594199931316609, 'weight_decay': 2.4685074147930517e-05}
+
+===== RESULTADOS GRAPHSAGE FINAL =====
+{'PR_AUC': 0.7425137608109611, 'F1': 0.6202433341962206, 'Precision': 0.5272887323943662, 'Recall': 0.7529855436832181}
+
+## Versão final das melhorias (Versão "tunada")
+
+===== MELHORES PARÂMETROS GRAPHSAGE =====
+{'hidden_dim': 128, 'lr': 0.00030288408341720935, 'dropout': 0.46262289945729784, 'weight_decay': 1.2846498080446342e-05}
+
+===== RESULTADOS GRAPHSAGE =====
+{'PR_AUC': 0.7274571347539416, 'F1': 0.5560239627246506, 'Precision': 0.42969821673525377, 'Recall': 0.7875549968573224}
+
+===== MELHORES PARÂMETROS GRAPHSAGE =====
+{'hidden_dim': 64, 'lr': 0.002072774282161724, 'dropout': 0.411266877681573, 'weight_decay': 8.024369116248995e-05}
+
+===== RESULTADOS GRAPHSAGE =====
+{'PR_AUC': 0.7676852881511206, 'F1': 0.6716750139120757, 'Precision': 0.6025961058412381, 'Recall': 0.7586423632935261}
+

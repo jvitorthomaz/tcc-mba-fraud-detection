@@ -13,7 +13,7 @@ def plot_confusion_matrix(y_true, y_pred, model_name):
     cm = confusion_matrix(y_true, y_pred)
 
     plt.figure()
-    sns.heatmap(cm, annot=True, fmt="d", cmap="YlOrRd")
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
     plt.xlabel("Predito")
     plt.ylabel("Real")
     plt.title(f"Matriz de Confusão - {model_name}")
