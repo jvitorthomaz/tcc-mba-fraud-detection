@@ -3,86 +3,7 @@
 python3.10 -m venv venv                                                    
 source venv/bin/activate
 
-## Rodada 1 de Ajustes
-
-| Modelo              | PR-AUC | F1-score | Precision | Recall |
-| ------------------- | ------ | -------- | --------- | ------ |
-| Logistic Regression | 0.280  | 0.341    | 0.230     | 0.665  |
-| Random Forest       | 0.781  | 0.818    | 0.938     | 0.725  |
-| XGBoost             | 0.803  | 0.798    | 0.892     | 0.722  |
-| GCN                 | 0.292  | 0.356    | 0.243     | 0.664  |
-| GraphSAGE           | 0.253  | 0.420    | 0.334     | 0.563  |
-| GAT                 | 0.307  | 0.409    | 0.293     | 0.677  |
-| EvolveGCN           | 0.341  | 0.230    | 0.134     | 0.808  |
-| TGN                 | 0.286  | 0.302    | 0.186     | 0.801  |
-
-
-## Rodada 2 de Ajustes (Sem data leakage)
-
-| Modelo              | PR-AUC | F1-score | Precision | Recall |
-| ------------------- | ------ | -------- | --------- | ------ |
-| Logistic Regression | 0.256  | 0.331    | 0.220     | 0.667  |
-| Random Forest       | 0.782  | 0.817    | 0.939     | 0.723  |
-| XGBoost             | 0.799  | 0.802    | 0.897     | 0.726  |
-| GCN                 | 0.231  | 0.385    | 0.271     | 0.665  |
-| GraphSAGE           | 0.326  | 0.449    | 0.373     | 0.561  |
-| GAT                 | 0.298  | 0.435    | 0.324     | 0.665  |
-| EvolveGCN           | 0.231  | 0.247    | 0.143     | 0.903  |
-| TGN                 | 0.251  | 0.224    | 0.128     | 0.889  |
-
-
-## Rodada 3 de Ajustes: class weights, early stopping e threshold tuning
-### Antes de alterar e adicionar: best_val = -1 e best_state = model.state_dict()
-===== RESULTADOS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.229360  0.305906   0.195297  0.705448
-1        RandomForest  0.786939  0.786248   0.853896  0.728532
-2             XGBoost  0.800324  0.776251   0.828272  0.730379
-
-GCN
-{'PR_AUC': 0.3061666664797773, 'F1': 0.443024494142705, 'Precision': 0.35986159169550175, 'Recall': 0.5761772853185596, 'model': 'GCN'}
-
-===== RESULTADOS GRAPHSAGE =====
-{'PR_AUC': 0.2785704698745555, 'F1': 0.43188064389477815, 'Precision': 0.3756830601092896, 'Recall': 0.5078485687903971, 'model': 'GraphSAGE'}
-
-===== RESULTADOS GAT =====
-{'PR_AUC': 0.29000854474451, 'F1': 0.46413199426111906, 'Precision': 0.37947214076246333, 'Recall': 0.5974145891043398, 'model': 'GAT'}
-
-===== RESULTADOS EVOLVE GCN =====
-{'PR_AUC': 0.2644962325122244, 'F1': 0.3357186669392762, 'Precision': 0.21559873949579833, 'Recall': 0.7580794090489381, 'model': 'EvolveGCN'}
-
-===== RESULTADOS TGN =====
-{'PR_AUC': 0.2981515813629563, 'F1': 0.3399638336347197, 'Precision': 0.2172573189522342, 'Recall': 0.7811634349030471, 'model': 'TGN'}
-
 ### Depois de alterar e adicionar: best_val = -1 e best_state = model.state_dict()
-
-| Modelo    | PR-AUC | F1-score | Precision | Recall |
-| --------- | ------ | -------- | --------- | ------ |
-| GCN       | 0.332  | 0.460    | 0.416     | 0.513  |
-| GraphSAGE | 0.267  | 0.434    | 0.327     | 0.645  |
-| GAT       | 0.216  | 0.272    | 0.163     | 0.801  |
-| EvolveGCN | 0.285  | 0.321    | 0.202     | 0.774  |
-| TGN       | 0.174  | 0.297    | 0.185     | 0.759  |
-
-
-
-===== RESULTADOS FINAIS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.238351  0.312201   0.196955  0.752539
-1        RandomForest  0.784590  0.750478   0.777998  0.724838
-2             XGBoost  0.794278  0.746818   0.763006  0.731302
-3            Ensemble  0.791499  0.802728   0.929526  0.706371
-
-
-===== RESULTADOS FINAIS =====
-                model    PR_AUC        F1  Precision    Recall
-0  LogisticRegression  0.236108  0.299443   0.189078  0.719298
-1        RandomForest  0.789679  0.808050   0.915789  0.722992
-2             XGBoost  0.798488  0.794949   0.877369  0.726685
-3     Ensemble_RF_XGB  0.797156  0.822961   0.982074  0.708218
-
-
-
 ## -------------------------------------------------------------------
 
 
@@ -223,6 +144,26 @@ LogisticRegression_Test   0.415876  0.507595   0.423886  0.632502   0.573469
 
 
 
+
+
+===== MELHORES PARÂMETROS XGBOOST =====
+{'n_estimators': 686, 'max_depth': 10, 'learning_rate': 0.015871642615770946, 'subsample': 0.9841014677771607, 'colsample_bytree': 0.6597408903772877, 'min_child_weight': 4, 'gamma': 4.54524368065516, 'reg_alpha': 0.589737282513381, 'reg_lambda': 1.0519176571430018, 'scale_pos_weight': 6.626249492461672}
+{'n_estimators': 686, 'max_depth': 10, 'learning_rate': 0.015871642615770946, 'subsample': 0.9841014677771607, 'colsample_bytree': 0.6597408903772877, 'min_child_weight': 4, 'gamma': 4.54524368065516, 'reg_alpha': 0.589737282513381, 'reg_lambda': 1.0519176571430018, 'scale_pos_weight': 6.626249492461672} | PR-AUC: 0.9965
+===== MELHORES PARÂMETROS RANDOM FOREST =====
+{'n_estimators': 208, 'max_depth': 15, 'min_samples_split': 5, 'min_samples_leaf': 3, 'max_features': 'sqrt', 'class_weight': 'balanced'}
+{'n_estimators': 208, 'max_depth': 15, 'min_samples_split': 5, 'min_samples_leaf': 3, 'max_features': 'sqrt', 'class_weight': 'balanced'} | PR-AUC: 0.9931
+===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
+{'C': 9.9443126549784, 'class_weight': None}
+{'C': 9.9443126549784, 'class_weight': None} | PR-AUC: 0.6902
+
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall  Threshold
+XGBoost             0.804389  0.769679   0.812308  0.731302        0.5
+RandomForest        0.794338  0.810950   0.920281  0.724838        0.5
+LogisticRegression  0.318390  0.457180   0.353119  0.648199        0.5
+
+
+
 ## --------------------------GRAFOS----------------------------
 
 ===== RESULTADOS FINAIS =====
@@ -234,10 +175,40 @@ EvolveGCN           0.501491  0.510901   0.421676  0.648020
 TGN_Temporal        
 
 
+
+| Versão       | PR-AUC    | F1        | Precision | Recall | Interpretação                                       |
+| ------------ | --------- | --------- | --------- | ------ | --------------------------------------------------- |
+| GCN Temporal | **0.759** | **0.681** | 0.620     | 0.756  |  forte capacidade de detectar fraudes. 
+| GCN padrão   | 0.724     | 0.632     | 0.553     | 0.737  |  Menor precisão e menor poder discriminativo.                      
+
+
+
+
+| Versão  | PR-AUC    | F1        | Precision | Recall    | Interpretação                                          |
+| ------  | ------    | -----     | --------- | --------- | ------------------------------------------------------ |
+| 1.      | 0.719     | **0.727** | **0.779** | 0.681     | alta precisão, menor recall. Ideal se quiser poucos falsos positivos. |
+| 2.      | 0.743     | 0.620     | 0.527     | 0.753     | prioriza recall. Melhor PR-AUC, mas perde bastante precisão.            
+
+| 3.      | 0.727     | 0.556     | 0.430     | **0.788** | detecta muitas fraudes, mas gera muitos falsos positivos.     
+
+|**best** | **0.768** | 0.672     | 0.603     | 0.759     | Melhor equilíbrio geral + maior PR-AUC.
+
+| 4.      | 0.753     | 0.641     | 0.561     | 0.746     | Boa alternativa: equilíbrio consistente,levemente inferior ao melhor.|
+
+
+
+
+| Versão | PR-AUC | F1    | Precision | Recall    | Interpretação                                          |
+| ------ | ------ | ----- | --------- | --------- | ------------------------------------------------------ |
+| GAT    | 0.676  | 0.513 | 0.383     | **0.778** | Alto recall, mas precisão muito baixa. Modelo instável |
+
+
+
 ## GCN
+
+## ======================================================================================================================
 ===== MELHORES PARÂMETROS GCN =====
 {'hidden_dim': 256, 'lr': 0.0028956146453530513, 'dropout': 0.5952925716514567, 'weight_decay': 0.00048273044132717376}
-
 ===== RESULTADOS GCN =====
 {'PR_AUC': 0.759437367372766, 'F1': 0.6812004530011325, 'Precision': 0.6197836166924265, 'Recall': 0.7561282212445003, 'model': 'GCN_TEMPORAL'}
 
@@ -247,32 +218,47 @@ TGN_Temporal
 ===== RESULTADOS GCN  =====
 {'PR_AUC': 0.7239495839842318, 'F1': 0.6320043103448276, 'Precision': 0.553041018387553, 'Recall': 0.7372721558768071, 'model': 'GCN'}
 
-### Versão inicial das melhorias
+### GRAPHSAGE - Versão inicial das melhorias
 ===== MELHORES PARÂMETROS GRAPHSAGE =====
 {'hidden_dim': 128, 'lr': 0.002888874568265193, 'dropout': 0.24752627452777007, 'weight_decay': 0.00014243209619628516}
 
 ===== RESULTADOS GRAPHSAGE =====
 {'PR_AUC': 0.7195272425004758, 'F1': 0.7267851156553805, 'Precision': 0.7787356321839081, 'Recall': 0.6813324952859836}
 
-### Versão atualizada das melhorias
-
+### GRAPHSAGE - Versão atualizada das melhorias
 ===== MELHORES PARÂMETROS GRAPHSAGE =====
 {'hidden_dim': 128, 'lr': 0.0021183760207006386, 'dropout': 0.4594199931316609, 'weight_decay': 2.4685074147930517e-05}
 
 ===== RESULTADOS GRAPHSAGE FINAL =====
 {'PR_AUC': 0.7425137608109611, 'F1': 0.6202433341962206, 'Precision': 0.5272887323943662, 'Recall': 0.7529855436832181}
 
-## Versão final das melhorias (Versão "tunada")
-
+## GRAPHSAGE - Versão final das melhorias (Versão "tunada")
 ===== MELHORES PARÂMETROS GRAPHSAGE =====
 {'hidden_dim': 128, 'lr': 0.00030288408341720935, 'dropout': 0.46262289945729784, 'weight_decay': 1.2846498080446342e-05}
 
 ===== RESULTADOS GRAPHSAGE =====
 {'PR_AUC': 0.7274571347539416, 'F1': 0.5560239627246506, 'Precision': 0.42969821673525377, 'Recall': 0.7875549968573224}
 
+
+## ======================================================================================================================
 ===== MELHORES PARÂMETROS GRAPHSAGE =====
 {'hidden_dim': 64, 'lr': 0.002072774282161724, 'dropout': 0.411266877681573, 'weight_decay': 8.024369116248995e-05}
 
 ===== RESULTADOS GRAPHSAGE =====
 {'PR_AUC': 0.7676852881511206, 'F1': 0.6716750139120757, 'Precision': 0.6025961058412381, 'Recall': 0.7586423632935261}
+## =======================================================================================================================
 
+===== MELHORES PARÂMETROS GRAPHSAGE =====
+{'hidden_dim': 128, 'lr': 0.0006241597602084456, 'dropout': 0.30453065508143384, 'weight_decay': 9.589922489396406e-05}
+
+===== RESULTADOS GRAPHSAGE =====
+{'PR_AUC': 0.7534813074090013, 'F1': 0.6407557354925777, 'Precision': 0.5614947965941344, 'Recall': 0.7460716530483973}
+
+
+## GAT
+
+===== MELHORES PARÂMETROS GAT =====
+{'hidden_dim': 64, 'heads': 4, 'lr': 0.0040725849067926425, 'dropout': 0.36030567465597596, 'weight_decay': 2.3070806808554974e-05}
+
+===== RESULTADOS GAT  =====
+{'PR_AUC': 0.6756422896524013, 'F1': 0.5130542892664732, 'Precision': 0.38268933539412675, 'Recall': 0.7781269641734758}
