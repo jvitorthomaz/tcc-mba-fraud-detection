@@ -57,11 +57,39 @@ LogisticRegression  0.318390  0.457180   0.353119  0.648199        0.5
 
 
 ## Tabulares - Threshold Dinamico
+### poucos trials
+===== MELHORES PARÂMETROS XGBOOST =====
+{'n_estimators': 434, 'max_depth': 5, 'learning_rate': 0.032238086867091974, 'subsample': 0.8889801797618265, 'colsample_bytree': 0.6516684303570686, 'min_child_weight': 1, 'gamma': 0.02636903748740027, 'reg_alpha': 0.22283213810173375, 'reg_lambda': 2.5748194970327916, 'scale_pos_weight': 7.7888983447626705}
+{'n_estimators': 434, 'max_depth': 5, 'learning_rate': 0.032238086867091974, 'subsample': 0.8889801797618265, 'colsample_bytree': 0.6516684303570686, 'min_child_weight': 1, 'gamma': 0.02636903748740027, 'reg_alpha': 0.22283213810173375, 'reg_lambda': 2.5748194970327916, 'scale_pos_weight': 7.7888983447626705} | PR-AUC: 1.0
+===== MELHORES PARÂMETROS RANDOM FOREST =====
+{'n_estimators': 163, 'max_depth': 15, 'min_samples_split': 6, 'min_samples_leaf': 3, 'max_features': 'sqrt', 'class_weight': 'balanced'}
+{'n_estimators': 163, 'max_depth': 15, 'min_samples_split': 6, 'min_samples_leaf': 3, 'max_features': 'sqrt', 'class_weight': 'balanced'} | PR-AUC: 0.999
+===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
+{'C': 9.881603169241544, 'class_weight': None}
+{'C': 9.881603169241544, 'class_weight': None} | PR-AUC: 0.7729
 
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+XGBoost             0.936203  0.881356   0.935120  0.833438
+RandomForest        0.919247  0.869477   0.946706  0.803897
+LogisticRegression  0.611435  0.670807   0.633520  0.712759
 
+### numero de trials adequado
 
-
-
+===== MELHORES PARÂMETROS XGBOOST =====
+{'n_estimators': 670, 'max_depth': 8, 'learning_rate': 0.08814799038376471, 'subsample': 0.6653855092941, 'colsample_bytree': 0.8693335435078344, 'min_child_weight': 4, 'gamma': 2.4140243944161184, 'reg_alpha': 4.627213371818737, 'reg_lambda': 4.509275285515258, 'scale_pos_weight': 15.110481641409203}
+{'n_estimators': 670, 'max_depth': 8, 'learning_rate': 0.08814799038376471, 'subsample': 0.6653855092941, 'colsample_bytree': 0.8693335435078344, 'min_child_weight': 4, 'gamma': 2.4140243944161184, 'reg_alpha': 4.627213371818737, 'reg_lambda': 4.509275285515258, 'scale_pos_weight': 15.110481641409203} | PR-AUC: 1.0
+===== MELHORES PARÂMETROS RANDOM FOREST =====
+{'n_estimators': 347, 'max_depth': 15, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'class_weight': 'balanced'}
+{'n_estimators': 347, 'max_depth': 15, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'class_weight': 'balanced'} | PR-AUC: 0.9992
+===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====
+{'C': 0.008298403612096272, 'class_weight': None}
+{'C': 0.008298403612096272, 'class_weight': None} | PR-AUC: 0.7694
+===== RESULTADOS FINAIS =====
+                      PR_AUC        F1  Precision    Recall
+XGBoost             0.938736  0.874561   0.888457  0.861094
+RandomForest        0.918461  0.868475   0.942605  0.805154
+LogisticRegression  0.639754  0.621532   0.556384  0.703960
 
 
 ## GCN - Threshold fixo
@@ -159,3 +187,14 @@ LogisticRegression  0.318390  0.457180   0.353119  0.648199        0.5
 
 
 ## GAT - Threshold Dinamico
+===== MELHORES PARÂMETROS GAT =====
+{'hidden_dim': 64, 'heads': 4, 'lr': 0.0025801763848030362, 'dropout': 0.2867348909177593, 'weight_decay': 0.00029570844657076333}
+===== RESULTADOS GAT =====
+{'PR_AUC': 0.7368710436024799, 'F1': 0.6799880703847302, 'Precision': 0.6469920544835415, 'Recall': 0.7165304839723444}
+
+
+## EvolveGCN - Threshold Dinamico
+===== MELHORES PARÂMETROS EVOLVEGCN =====
+{'hidden_dim': 64, 'lr': 0.0043621851780052, 'dropout': 0.3646611057679059, 'weight_decay': 0.0002657150963463047}
+===== RESULTADOS EVOLVEGCN =====
+{'PR_AUC': 0.7401136967683054, 'F1': 0.6719803801348865, 'Precision': 0.6558946738479952, 'Recall': 0.688874921433061}
