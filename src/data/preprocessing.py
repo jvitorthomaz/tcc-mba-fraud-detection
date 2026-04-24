@@ -1,3 +1,0 @@
-''''
-Limpeza e normalização
-'''

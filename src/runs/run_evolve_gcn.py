@@ -1,17 +1,9 @@
-'''
-
-python -m experiments.run_tgn
-
-
-tentar melhorar TGN:
-message passing temporal
-attention temporal
-edge features
-
+''''
+python -m experiments.run_evolve_gcn
 '''
 from src.data.split import get_elliptic_splits
-from src.models.preliminary.tgn import run_tgn
-from src.models.tgn_temporal import run_tgn_temporal
+from src.models.preliminary.evolve_gcn import run_evolve_gcn
+from src.models.evolve_gcn_temporal import run_evolvegcn_temporal
 from src.features.graph_features import add_graph_features
 
 import pandas as pd
@@ -48,8 +40,8 @@ def main():
     # ==============================
     # RODAR MODELO
     # ==============================
-    run_tgn(df_train, df_val, df_test, edges)
-    run_tgn_temporal(df_train, df_val, df_test, edges)
+    # run_evolve_gcn(df_train, df_val, df_test, edges)
+    run_evolvegcn_temporal(df_train, df_val, df_test, edges)
 
 
 if __name__ == "__main__":
