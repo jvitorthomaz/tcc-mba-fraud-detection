@@ -323,8 +323,8 @@ def run_evolvegcn_temporal(df_train, df_val, df_test, edges):
     print("\n===== RESULTADOS EVOLVEGCN =====")
     print(results)
 
-    plot_confusion_matrix(y_true, y_pred, "EvolveGCN-H")
-    plot_pr_curve(y_true, y_prob, "EvolveGCN-H")
+    plot_confusion_matrix(y_true, y_pred, "EvolveGCN")
+    plot_pr_curve(y_true, y_prob, "EvolveGCN")
 
     return results
 
