@@ -63,7 +63,7 @@ def main():
     # ==============================
     # TREINAMENTO
     # ==============================
-    run_baseline_models(df_train, df_val, df_test)
+    run_logistic_regression(df_train, df_val, df_test)
 
 
 if __name__ == "__main__":
