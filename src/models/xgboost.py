@@ -69,13 +69,13 @@ def tune_global(df_train, df_val):
     print("\n===== TUNING GLOBAL =====")
 
     model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    # model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    # model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
 
     return {
         "XGBoost": model_xgb,
-        "RandomForest": model_rf,
-        "LogisticRegression": model_lr
+        # "RandomForest": model_rf,
+        # "LogisticRegression": model_lr
     }
 
 
@@ -142,8 +142,8 @@ def run_xgboost(df_train, df_val, df_test):
         # ==============================
         models = {
             "XGBoost": XGBClassifier(**best_models["XGBoost"].get_params()),
-            "RandomForest": clone(best_models["RandomForest"]),
-            "LogisticRegression": clone(best_models["LogisticRegression"])
+            # "RandomForest": clone(best_models["RandomForest"]),
+            # "LogisticRegression": clone(best_models["LogisticRegression"])
         }
 
         # ==============================
@@ -202,6 +202,6 @@ def run_xgboost(df_train, df_val, df_test):
     print("\n===== RESULTADOS FINAIS =====")
     print(results_df)
 
-    results_df.to_csv("results/baseline_temporal_results.csv")
+    results_df.to_csv("results/xgboost_temporal_results.csv")
 
     return results_df

@@ -1,12 +1,12 @@
 """
-python -m experiments.run_baseline
+python -m src.runs.run_logistic_regression
 """
 
 import pandas as pd
 
 from src.data.split import get_elliptic_splits
 from src.features.graph_features import add_graph_features
-from src.models.baseline import run_baseline_models
+from src.models.logistic_regression import run_logistic_regression
 
 from src.utils.config import FEATURES_FILE, CLASSES_FILE, EDGES_FILE
 

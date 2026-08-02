@@ -35,7 +35,9 @@ def tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_tra
         return average_precision_score(y_val, probs)
 
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=50)
+    #study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=2)
+
 
     print("\n===== MELHORES PARÂMETROS LOGISTIC REGRESSION =====")
     print(study.best_params)

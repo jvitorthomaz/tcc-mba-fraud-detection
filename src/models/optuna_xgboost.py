@@ -56,8 +56,8 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
         return average_precision_score(y_val, probs)
 
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=150)
-    # study.optimize(objective, n_trials=30)
+    #study.optimize(objective, n_trials=150)
+    study.optimize(objective, n_trials=2)
 
     print("\n===== MELHORES PARÂMETROS XGBOOST =====")
     print(study.best_params)

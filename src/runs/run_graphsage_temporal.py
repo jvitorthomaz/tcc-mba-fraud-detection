@@ -1,5 +1,5 @@
 ''''
-python -m experiments.run_graphsage_temporal
+python -m src.runs.run_graphsage_temporal
 '''
 
 from src.data.split import get_elliptic_splits

@@ -1,5 +1,5 @@
 ''''
-python -m experiments.run_gat
+python -m src.runs.run_gat
 '''
 from src.data.split import get_elliptic_splits
 from src.models.preliminary.gat import run_gat

@@ -30,13 +30,15 @@ def tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_ful
         return average_precision_score(y_val, probs)
 
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100)
+    #study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=5)
+
 
     # study.optimize(objective, n_trials=30)
 
     print("\n===== MELHORES PARÂMETROS RANDOM FOREST =====")
     print(study.best_params)
-    print(study.best_params, "| PR-AUC:", round(study.best_value, 4))
+    print(study.best_params, "| PR-AUC:", round(study.best_value, 2))
 
     best_model = RandomForestClassifier(
         **study.best_params,

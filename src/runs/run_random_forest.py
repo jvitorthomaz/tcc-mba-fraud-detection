@@ -1,12 +1,12 @@
 """
-python -m experiments.run_baseline
+python -m src.runs.run_random_forest
 """
 
 import pandas as pd
 
 from src.data.split import get_elliptic_splits
 from src.features.graph_features import add_graph_features
-from src.models.baseline import run_baseline_models
+from src.models.random_forest import run_random_forest
 
 from src.utils.config import FEATURES_FILE, CLASSES_FILE, EDGES_FILE
 

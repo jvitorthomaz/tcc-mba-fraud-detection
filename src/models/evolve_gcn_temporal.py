@@ -209,7 +209,9 @@ def tune_evolvegcn(df_train, df_val, edges):
     df_all = pd.concat([df_train, df_val]).reset_index(drop=True)
 
     study = optuna.create_study(direction="maximize")
-    study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=40)
+    study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=5)
+    #    study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=40)
+
 
     print("\n===== MELHORES PARÂMETROS EVOLVEGCN =====")
     print(study.best_params)

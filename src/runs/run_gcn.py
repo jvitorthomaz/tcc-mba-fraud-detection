@@ -1,5 +1,5 @@
 ''''
-python -m experiments.run_gcn
+python -m src.runs.run_gcn
 '''
 from src.data.split import get_elliptic_splits
 from src.models.preliminary.gcn import run_gcn

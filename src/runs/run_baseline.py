@@ -1,5 +1,5 @@
 """
-python -m experiments.run_baseline
+python -m src.runs.run_baseline
 """
 
 import pandas as pd

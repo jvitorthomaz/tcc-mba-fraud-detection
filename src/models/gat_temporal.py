@@ -216,7 +216,8 @@ def tune_gat(df_train, df_val, edges):
 
     study.optimize(
         lambda trial: objective(trial, df_all, edges),
-        n_trials=50
+        n_trials=5
+        #n_trials=50
     )
 
     print("\n===== MELHORES PARÂMETROS GAT =====")

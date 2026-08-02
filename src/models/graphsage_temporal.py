@@ -203,7 +203,8 @@ def tune_graphsage(df_train, df_val, edges):
 
     study.optimize(
         lambda trial: objective(trial, df_all, edges),
-        n_trials=70
+        # n_trials=70
+        n_trials=5
     )
 
     print("\n===== MELHORES PARÂMETROS GRAPHSAGE =====")

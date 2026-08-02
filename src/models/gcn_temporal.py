@@ -173,7 +173,9 @@ def tune_gcn(df_train, df_val, edges):
     df_all = pd.concat([df_train, df_val]).reset_index(drop=True)
     study = optuna.create_study(direction="maximize")
 
-    study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=50)
+    #study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=50)
+    study.optimize(lambda trial: objective(trial, df_all, edges), n_trials=5)
+
 
     print("\n===== MELHORES PARÂMETROS GCN =====")
     print(study.best_params)
