@@ -15,9 +15,9 @@ from sklearn.base import clone
 
 from xgboost import XGBClassifier
 
-from src.models.optuna_xgboost import tune_xgboost
-from src.models.optuna_random_forest import tune_random_forest
-from src.models.optuna_logistic_regression import tune_logistic_regression
+from src.models.optuna_train.optuna_xgboost import tune_xgboost
+from src.models.optuna_train.optuna_random_forest import tune_random_forest
+from src.models.optuna_train.optuna_logistic_regression import tune_logistic_regression
 
 from src.evaluation.plots import (
     plot_confusion_matrix,

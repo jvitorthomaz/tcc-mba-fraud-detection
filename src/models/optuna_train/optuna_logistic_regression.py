@@ -1,9 +1,6 @@
 import optuna
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score
-
-
-from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 import optuna

@@ -6,7 +6,7 @@ import pandas as pd
 
 from src.data.split import get_elliptic_splits
 from src.features.graph_features import add_graph_features
-from src.models.baseline import run_baseline_models
+from src.models.all_baseline_models_call.baseline import run_baseline_models
 
 from src.utils.config import FEATURES_FILE, CLASSES_FILE, EDGES_FILE
 

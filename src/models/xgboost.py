@@ -9,15 +9,12 @@ from sklearn.metrics import (
     average_precision_score
 )
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.base import clone
 
 from xgboost import XGBClassifier
 
-from src.models.optuna_xgboost import tune_xgboost
-from src.models.optuna_random_forest import tune_random_forest
-from src.models.optuna_logistic_regression import tune_logistic_regression
+from src.models.optuna_train.optuna_xgboost import tune_xgboost
+
 
 from src.evaluation.plots import (
     plot_confusion_matrix,
@@ -69,13 +66,10 @@ def tune_global(df_train, df_val):
     print("\n===== TUNING GLOBAL =====")
 
     model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    # model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    # model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+
 
     return {
         "XGBoost": model_xgb,
-        # "RandomForest": model_rf,
-        # "LogisticRegression": model_lr
     }
 
 
@@ -142,8 +136,6 @@ def run_xgboost(df_train, df_val, df_test):
         # ==============================
         models = {
             "XGBoost": XGBClassifier(**best_models["XGBoost"].get_params()),
-            # "RandomForest": clone(best_models["RandomForest"]),
-            # "LogisticRegression": clone(best_models["LogisticRegression"])
         }
 
         # ==============================

@@ -51,6 +51,8 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
             verbose=False
         )
 
+        trial.set_user_attr("best_iteration", model.best_iteration)
+
         probs = model.predict_proba(X_val)[:, 1]
 
         return average_precision_score(y_val, probs)
@@ -63,8 +65,13 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
     print(study.best_params)
     print(study.best_params, "| PR-AUC:", round(study.best_value, 4))
 
+    best_n_estimators = study.best_trial.user_attrs["best_iteration"] + 1
+    final_params = {**study.best_params, "n_estimators": best_n_estimators}
+
+    print("n_estimators final (via early stopping):", best_n_estimators)
+
     best_model = XGBClassifier(
-        **study.best_params,
+        **final_params,
         random_state=42,
         n_jobs=-1,
         eval_metric="logloss"
