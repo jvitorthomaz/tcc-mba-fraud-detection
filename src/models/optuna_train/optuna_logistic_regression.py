@@ -1,12 +1,16 @@
+import numpy as np
 import optuna
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-import optuna
-from sklearn.metrics import average_precision_score
 
-def tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
+
+def tune_logistic_regression(df_train, df_val):
+
+    df_all = pd.concat([df_train, df_val]).reset_index(drop=True)
+    feature_cols = [c for c in df_all.columns if c not in ["txId", "class", "time_step"]]
 
     def objective(trial):
         C = trial.suggest_float("C", 1e-3, 10, log=True)
@@ -16,20 +20,31 @@ def tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_tra
             [None, "balanced"]
         )
 
-        model = Pipeline([
-            ("scaler", StandardScaler()),
-            ("lr", LogisticRegression(
-                C=C,
-                class_weight=class_weight,
-                max_iter=2000,
-                n_jobs=-1
-            ))
-        ])
+        scores = []
 
-        model.fit(X_train, y_train)
+        for t in [32, 33, 34]:
+            df_t_train = df_all[df_all["time_step"] < t]
+            df_t_val = df_all[df_all["time_step"] == t]
 
-        probs = model.predict_proba(X_val)[:, 1]
-        return average_precision_score(y_val, probs)
+            if len(df_t_train) == 0 or len(df_t_val) == 0:
+                continue
+
+            model = Pipeline([
+                ("scaler", StandardScaler()),
+                ("lr", LogisticRegression(
+                    C=C,
+                    class_weight=class_weight,
+                    max_iter=2000,
+                    n_jobs=-1
+                ))
+            ])
+
+            model.fit(df_t_train[feature_cols], df_t_train["class"])
+
+            probs = model.predict_proba(df_t_val[feature_cols])[:, 1]
+            scores.append(average_precision_score(df_t_val["class"], probs))
+
+        return np.mean(scores) if scores else 0
 
     study = optuna.create_study(direction="maximize")
     #study.optimize(objective, n_trials=50)
@@ -49,6 +64,6 @@ def tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_tra
         ))
     ])
 
-    best_model.fit(X_train_full, y_train_full)
+    best_model.fit(df_all[feature_cols], df_all["class"])
 
     return best_model

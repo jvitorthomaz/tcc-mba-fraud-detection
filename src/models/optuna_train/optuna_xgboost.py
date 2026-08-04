@@ -1,4 +1,6 @@
+import numpy as np
 import optuna
+import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.metrics import average_precision_score
 
@@ -13,9 +15,12 @@ def compute_scale_pos_weight(y):
     return neg / pos
 
 
-def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
+def tune_xgboost(df_train, df_val):
 
-    base_scale = compute_scale_pos_weight(y_train)
+    df_all = pd.concat([df_train, df_val]).reset_index(drop=True)
+    feature_cols = [c for c in df_all.columns if c not in ["txId", "class", "time_step"]]
+
+    base_scale = compute_scale_pos_weight(df_all[df_all["time_step"] < 32]["class"])
 
     def objective(trial):
         params = {
@@ -42,20 +47,33 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
             "early_stopping_rounds": 50
         }
 
-        model = XGBClassifier(**params)
+        scores = []
+        best_iterations = []
 
-        model.fit(
-            X_train,
-            y_train,
-            eval_set=[(X_val, y_val)],
-            verbose=False
-        )
+        for t in [32, 33, 34]:
+            df_t_train = df_all[df_all["time_step"] < t]
+            df_t_val = df_all[df_all["time_step"] == t]
 
-        trial.set_user_attr("best_iteration", model.best_iteration)
+            if len(df_t_train) == 0 or len(df_t_val) == 0:
+                continue
 
-        probs = model.predict_proba(X_val)[:, 1]
+            model = XGBClassifier(**params)
 
-        return average_precision_score(y_val, probs)
+            model.fit(
+                df_t_train[feature_cols],
+                df_t_train["class"],
+                eval_set=[(df_t_val[feature_cols], df_t_val["class"])],
+                verbose=False
+            )
+
+            best_iterations.append(model.best_iteration)
+
+            probs = model.predict_proba(df_t_val[feature_cols])[:, 1]
+            scores.append(average_precision_score(df_t_val["class"], probs))
+
+        trial.set_user_attr("best_iterations", best_iterations)
+
+        return np.mean(scores) if scores else 0
 
     study = optuna.create_study(direction="maximize")
     #study.optimize(objective, n_trials=150)
@@ -65,10 +83,10 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
     print(study.best_params)
     print(study.best_params, "| PR-AUC:", round(study.best_value, 4))
 
-    best_n_estimators = study.best_trial.user_attrs["best_iteration"] + 1
+    best_n_estimators = round(np.mean(study.best_trial.user_attrs["best_iterations"])) + 1
     final_params = {**study.best_params, "n_estimators": best_n_estimators}
 
-    print("n_estimators final (via early stopping):", best_n_estimators)
+    print("n_estimators final (média das 3 janelas via early stopping):", best_n_estimators)
 
     best_model = XGBClassifier(
         **final_params,
@@ -77,6 +95,6 @@ def tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full):
         eval_metric="logloss"
     )
 
-    best_model.fit(X_train_full, y_train_full)
+    best_model.fit(df_all[feature_cols], df_all["class"])
 
     return best_model

@@ -52,25 +52,11 @@ def find_best_threshold(y_true, y_probs):
 # ==============================
 def tune_global(df_train, df_val):
 
-    feature_cols = [
-        c for c in df_train.columns
-        if c not in ["txId", "class", "time_step"]
-    ]
-
-    X_train = df_train[feature_cols]
-    y_train = df_train["class"]
-
-    X_val = df_val[feature_cols]
-    y_val = df_val["class"]
-
-    X_train_full = pd.concat([X_train, X_val])
-    y_train_full = pd.concat([y_train, y_val])
-
     print("\n===== TUNING GLOBAL =====")
 
-    model_xgb = tune_xgboost(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_rf = tune_random_forest(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
-    model_lr = tune_logistic_regression(X_train, y_train, X_val, y_val, X_train_full, y_train_full)
+    model_xgb = tune_xgboost(df_train, df_val)
+    model_rf = tune_random_forest(df_train, df_val)
+    model_lr = tune_logistic_regression(df_train, df_val)
 
     return {
         "XGBoost": model_xgb,
@@ -97,12 +83,9 @@ def run_baseline_models(df_train, df_val, df_test):
     max_time = int(df_all["time_step"].max())
 
     # ==============================
-    # TUNING GLOBAL (fixo)
+    # TUNING GLOBAL (janela rolante 32-34)
     # ==============================
-    df_train_init = df_all[df_all["time_step"] < 32]
-    df_val_init = df_all[df_all["time_step"] == 32]
-
-    best_models = tune_global(df_train_init, df_val_init)
+    best_models = tune_global(df_train, df_val)
 
     # ==============================
     # STORAGE GLOBAL
