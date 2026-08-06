@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn.functional as F
 import pandas as pd
@@ -19,6 +21,13 @@ from src.evaluation.plots import (
     plot_confusion_matrix,
     plot_pr_curve
 )
+from src.evaluation.metrics import evaluate_timestep
+from src.utils.config import RANDOM_SEED
+
+os.makedirs("results/per_timestep", exist_ok=True)
+
+torch.manual_seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
 
 # ==============================
 # DEVICE
@@ -26,7 +35,7 @@ from src.evaluation.plots import (
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
 
-MAX_EPOCHS = 500
+MAX_EPOCHS = 1000
 PATIENCE = 20
 
 
@@ -240,6 +249,7 @@ def run_evolvegcn_temporal(df_train, df_val, df_test, edges):
     best_params = tune_evolvegcn(df_train, df_val, edges)
 
     all_probs, all_preds, all_true = [], [], []
+    timestep_records = []
 
     for t in range(30, max_time):
 
@@ -305,11 +315,20 @@ def run_evolvegcn_temporal(df_train, df_val, df_test, edges):
 
         idx = (df_eval["time_step"] == (t + 1)).values
 
-        all_true.extend(y_eval[idx].cpu().numpy())
-        all_probs.extend(probs[idx])
+        y_step_true = y_eval[idx].cpu().numpy()
+        y_step_prob = probs[idx]
+        y_step_pred = (y_step_prob >= best_t).astype(int)
 
-        preds = (probs[idx] >= best_t).astype(int)
-        all_preds.extend(preds)
+        all_true.extend(y_step_true)
+        all_probs.extend(y_step_prob)
+        all_preds.extend(y_step_pred)
+
+        timestep_records.append({
+            "time_step": t + 1,
+            **evaluate_timestep(y_step_true, y_step_pred, y_step_prob)
+        })
+
+    pd.DataFrame(timestep_records).to_csv("results/per_timestep/EvolveGCN.csv", index=False)
 
     y_true = np.array(all_true)
     y_prob = np.array(all_probs)

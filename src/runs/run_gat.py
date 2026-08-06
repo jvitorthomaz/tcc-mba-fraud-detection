@@ -2,7 +2,6 @@
 python -m src.runs.run_gat
 '''
 from src.data.split import get_elliptic_splits
-from src.models.preliminary.gat import run_gat
 from src.models.gat_temporal import run_gat_temporal
 
 from src.features.graph_features import add_graph_features
@@ -27,7 +26,6 @@ def main():
     df_val = df_all[(df_all["time_step"] > 30) & (df_all["time_step"] <= 34)]
     df_test = df_all[df_all["time_step"] > 34]
 
-    # run_gat(df_train, df_val, df_test, edges)
     run_gat_temporal(df_train, df_val, df_test, edges)
 
 

@@ -23,8 +23,10 @@ from src.evaluation.plots import (
     plot_confusion_matrix,
     plot_pr_curve
 )
+from src.evaluation.metrics import evaluate_timestep
 
 os.makedirs("results/figures", exist_ok=True)
+os.makedirs("results/per_timestep", exist_ok=True)
 
 
 # ==============================
@@ -93,6 +95,7 @@ def run_baseline_models(df_train, df_val, df_test):
     all_probs = {name: [] for name in best_models.keys()}
     all_preds = {name: [] for name in best_models.keys()}
     all_true = []
+    timestep_records = {name: [] for name in best_models.keys()}
 
     # ==============================
     # LOOP TEMPORAL
@@ -156,6 +159,11 @@ def run_baseline_models(df_train, df_val, df_test):
             all_probs[name].extend(probs_test)
             all_preds[name].extend(preds_test)
 
+            timestep_records[name].append({
+                "time_step": t + 1,
+                **evaluate_timestep(y_target, preds_test, probs_test)
+            })
+
         all_true.extend(y_target)
 
     y_true = np.array(all_true)
@@ -179,6 +187,10 @@ def run_baseline_models(df_train, df_val, df_test):
 
         plot_confusion_matrix(y_true, y_pred, name)
         plot_pr_curve(y_true, y_prob, name)
+
+        pd.DataFrame(timestep_records[name]).to_csv(
+            f"results/per_timestep/{name}.csv", index=False
+        )
 
     results_df = pd.DataFrame(results).T
 

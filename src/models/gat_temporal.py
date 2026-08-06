@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn.functional as F
 import pandas as pd
@@ -19,6 +21,13 @@ from src.evaluation.plots import (
     plot_confusion_matrix,
     plot_pr_curve
 )
+from src.evaluation.metrics import evaluate_timestep
+from src.utils.config import RANDOM_SEED
+
+os.makedirs("results/per_timestep", exist_ok=True)
+
+torch.manual_seed(RANDOM_SEED)
+np.random.seed(RANDOM_SEED)
 
 # ==============================
 # DEVICE
@@ -252,6 +261,7 @@ def run_gat_temporal(df_train, df_val, df_test, edges):
     all_test_probs = []
     all_test_true = []
     all_test_preds = []
+    timestep_records = []
 
     for t in range(30, max_time):
 
@@ -342,6 +352,13 @@ def run_gat_temporal(df_train, df_val, df_test, edges):
         all_test_true.extend(y_step_true)
         all_test_probs.extend(y_step_prob)
         all_test_preds.extend(y_step_pred)
+
+        timestep_records.append({
+            "time_step": t + 1,
+            **evaluate_timestep(y_step_true, y_step_pred, y_step_prob)
+        })
+
+    pd.DataFrame(timestep_records).to_csv("results/per_timestep/GAT.csv", index=False)
 
     y_true = np.array(all_test_true)
     y_prob = np.array(all_test_probs)
